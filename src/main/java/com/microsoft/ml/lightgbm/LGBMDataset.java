@@ -28,7 +28,7 @@ public class LGBMDataset {
         }
     }
 
-    public static LGBMDataset createFromMat(float[] data, int rows, int cols, boolean isRowMajor) throws LGBMException {
+    public static LGBMDataset createFromMat(float[] data, int rows, int cols, boolean isRowMajor, String parameters) throws LGBMException {
         SWIGTYPE_p_p_void handle = new_voidpp();
         SWIGTYPE_p_float dataBuffer = new_floatArray(data.length);
         for (int i = 0; i < data.length; i++) {
@@ -41,7 +41,7 @@ public class LGBMDataset {
                 rows,
                 cols,
                 isRowMajor ? 1 : 0,
-                "",
+                parameters,
                 null,
                 handle
         );

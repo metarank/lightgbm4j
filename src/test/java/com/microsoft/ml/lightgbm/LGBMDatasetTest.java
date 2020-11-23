@@ -21,20 +21,20 @@ public class LGBMDatasetTest {
         });
     }
 
-    @Test void createFromMat() {
+    @Test void testCreateFromMat() {
         Assertions.assertDoesNotThrow( () -> {
-            LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true);
+            LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "");
         });
     }
 
     @Test void testGetNumData() throws LGBMException {
-        LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true);
+        LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "");
         assertEquals(2, ds.getNumData());
         ds.close();
     }
 
     @Test void testGetNumFeature() throws LGBMException {
-        LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true);
+        LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "");
         assertEquals(2, ds.getNumFeatures());
         ds.close();
     }
