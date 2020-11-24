@@ -260,7 +260,7 @@ public class LGBMBooster {
     /**
      * Save model to string.
      * @param startIteration Start index of the iteration that should be saved
-     * @param numIteration Index of the iteration that should be saved, <= 0 means save all
+     * @param numIteration Index of the iteration that should be saved, 0 and negative means save all
      * @param featureImportance Type of feature importance, can be FeatureImportanceType.SPLIT or FeatureImportanceType.GAIN
      * @return
      */
