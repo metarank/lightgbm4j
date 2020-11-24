@@ -1,4 +1,6 @@
-package com.microsoft.ml.lightgbm;
+package io.github.metarank.lightgbm4j;
+
+import com.microsoft.ml.lightgbm.*;
 
 import java.io.IOException;
 

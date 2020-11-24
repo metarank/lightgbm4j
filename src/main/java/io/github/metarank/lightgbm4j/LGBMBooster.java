@@ -1,4 +1,6 @@
-package com.microsoft.ml.lightgbm;
+package io.github.metarank.lightgbm4j;
+
+import com.microsoft.ml.lightgbm.*;
 
 import java.io.*;
 
@@ -32,9 +34,22 @@ public class LGBMBooster {
      */
     public synchronized static void loadNative() throws IOException {
         if (!nativeLoaded) {
-            loadNative("com/microsoft/ml/lightgbm/linux/x86_64/lib_lightgbm.so", "lightgbm");
-            loadNative("com/microsoft/ml/lightgbm/linux/x86_64/lib_lightgbm_swig.so", "lightgbm_swig");
-            nativeLoaded = true;
+            String os = System.getProperty("os.name");
+            if (os.startsWith("Linux") || os.startsWith("LINUX")) {
+                loadNative("linux/x86_64/lib_lightgbm.so", "lightgbm");
+                loadNative("linux/x86_64/lib_lightgbm_swig.so", "lightgbm_swig");
+                nativeLoaded = true;
+            } else if (os.startsWith("Mac")) {
+                loadNative("mac/x86_64/lib_lightgbm.dylib", "lightgbm");
+                loadNative("mac/x86_64/lib_lightgbm_swig.dylib", "lightgbm_swig");
+                nativeLoaded = true;
+            } else if (os.startsWith("Windows")) {
+                loadNative("windows/x86_64/lib_lightgbm.dll", "lightgbm");
+                loadNative("windows/x86_64/lib_lightgbm_swig.dll", "lightgbm_swig");
+                nativeLoaded = true;
+            } else {
+                System.out.println("Only Linux/Windows/Mac on x86_64 are supported");
+            }
         }
     }
 

@@ -1,5 +1,7 @@
-package com.microsoft.ml.lightgbm;
+package io.github.metarank.lightgbm4j;
 
+import io.github.metarank.lightgbm4j.LGBMDataset;
+import io.github.metarank.lightgbm4j.LGBMException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

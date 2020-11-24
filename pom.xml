@@ -50,14 +50,6 @@
             <version>5.7.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.microsoft.ml</groupId>
-            <artifactId>lightgbm</artifactId>
-            <version>3.1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/lightgbmlib_linux.jar</systemPath>
-        </dependency>
-
     </dependencies>
     <build>
         <testResources>
