@@ -1,4 +1,4 @@
-package com.microsoft.ml.lightgbm;
+package io.github.metarank.lightgbm4j;
 
 public class LGBMException extends Exception {
     public LGBMException(String message) {
