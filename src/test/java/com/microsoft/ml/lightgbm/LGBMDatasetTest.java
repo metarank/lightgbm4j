@@ -21,9 +21,15 @@ public class LGBMDatasetTest {
         });
     }
 
-    @Test void testCreateFromMat() {
+    @Test void testCreateFromMatFloat() {
         Assertions.assertDoesNotThrow( () -> {
             LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "");
+        });
+    }
+
+    @Test void testCreateFromMatDouble() {
+        Assertions.assertDoesNotThrow( () -> {
+            LGBMDataset.createFromMat(new double[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "");
         });
     }
 

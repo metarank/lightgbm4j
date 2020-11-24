@@ -17,10 +17,19 @@ public class LGBMBooster {
         }
     }
 
+    /**
+     * Called from tests.
+     * @return true if JNI libraries were loaded successfully.
+     */
     public static boolean isNativeLoaded() {
         return nativeLoaded;
     }
 
+    /**
+     * Loads all corresponsing native libraries for current platform. Called from the class initializer,
+     * so usually there is no need to call it directly.
+     * @throws IOException
+     */
     public synchronized static void loadNative() throws IOException {
         if (!nativeLoaded) {
             loadNative("com/microsoft/ml/lightgbm/linux/x86_64/lib_lightgbm.so", "lightgbm");
@@ -53,11 +62,22 @@ public class LGBMBooster {
         }
     }
 
-    public LGBMBooster(int iterations, SWIGTYPE_p_p_void handle) {
+    /**
+     * Constructor is private because you need to have a JNI handle for native LightGBM instance.
+     * @param iterations
+     * @param handle
+     */
+    LGBMBooster(int iterations, SWIGTYPE_p_p_void handle) {
         this.iterations = iterations;
         this.handle = handle;
     }
 
+    /**
+     * Load an existing booster from model file.
+     * @param file Filename of model
+     * @return Booster instance.
+     * @throws LGBMException
+     */
     public static LGBMBooster createFromModelfile(String file) throws LGBMException {
         SWIGTYPE_p_p_void handle = new_voidpp();
         SWIGTYPE_p_int outIterations = new_intp();
@@ -71,6 +91,12 @@ public class LGBMBooster {
         }
     }
 
+    /**
+     * Load an existing booster from string.
+     * @param model Model string
+     * @return Booster instance.
+     * @throws LGBMException
+     */
     public static LGBMBooster loadModelFromString(String model) throws LGBMException {
         SWIGTYPE_p_p_void handle = new_voidpp();
         SWIGTYPE_p_int outIterations = new_intp();
@@ -84,6 +110,10 @@ public class LGBMBooster {
         }
     }
 
+    /**
+     * Deallocate all native memory for the LightGBM model.
+     * @throws LGBMException
+     */
     public void close() throws LGBMException {
         int result = LGBM_BoosterFree(voidpp_value(handle));
         if (result < 0) {
@@ -91,6 +121,15 @@ public class LGBMBooster {
         }
     }
 
+    /**
+     * Make prediction for a new float[] dataset.
+     * @param input input matrix, as a 1D array. Size should be rows * cols.
+     * @param rows number of rows
+     * @param cols number of cols
+     * @param isRowMajor is the 1d encoding a row-major?
+     * @return array of predictions
+     * @throws LGBMException
+     */
     public double[] predictForMat(float[] input, int rows, int cols, boolean isRowMajor) throws LGBMException {
         SWIGTYPE_p_float dataBuffer = new_floatArray(input.length);
         for (int i = 0; i < input.length; i++) {
@@ -128,6 +167,15 @@ public class LGBMBooster {
             return values;
         }
     }
+    /**
+     * Make prediction for a new double[] dataset.
+     * @param input input matrix, as a 1D array. Size should be rows * cols.
+     * @param rows number of rows
+     * @param cols number of cols
+     * @param isRowMajor is the 1d encoding a row-major?
+     * @return array of predictions
+     * @throws LGBMException
+     */
 
     public double[] predictForMat(double[] input, int rows, int cols, boolean isRowMajor) throws LGBMException {
         SWIGTYPE_p_double dataBuffer = new_doubleArray(input.length);
@@ -167,6 +215,13 @@ public class LGBMBooster {
         }
     }
 
+    /**
+     * Create a new boosting learner.
+     * @param dataset a LGBMDataset with the training data.
+     * @param parameters Parameters in format ‘key1=value1 key2=value2’
+     * @return
+     * @throws LGBMException
+     */
     public static LGBMBooster create(LGBMDataset dataset, String parameters) throws LGBMException {
         SWIGTYPE_p_p_void handle = new_voidpp();
         int result = LGBM_BoosterCreate(dataset.handle, parameters, handle);
@@ -177,6 +232,11 @@ public class LGBMBooster {
         }
     }
 
+    /**
+     * Update the model for one iteration.
+     * @return true if there are no more splits possible, so training is finished.
+     * @throws LGBMException
+     */
     public boolean updateOneIter() throws LGBMException {
         SWIGTYPE_p_int isFinishedP = new_intp();
         int result = LGBM_BoosterUpdateOneIter(voidpp_value(handle), isFinishedP);
@@ -197,7 +257,14 @@ public class LGBMBooster {
 
     private final long SAVE_BUFFER_SIZE = 10 * 1024 * 1024L;
 
-    public String saveModelToString(int startIteration, int numIteration, FeatureImportanceType featureImportance) throws LGBMException {
+    /**
+     * Save model to string.
+     * @param startIteration Start index of the iteration that should be saved
+     * @param numIteration Index of the iteration that should be saved, <= 0 means save all
+     * @param featureImportance Type of feature importance, can be FeatureImportanceType.SPLIT or FeatureImportanceType.GAIN
+     * @return
+     */
+    public String saveModelToString(int startIteration, int numIteration, FeatureImportanceType featureImportance)  {
         int importanceType = C_API_FEATURE_IMPORTANCE_GAIN;
         switch (featureImportance) {
             case GAIN:
@@ -219,6 +286,10 @@ public class LGBMBooster {
         return result;
     }
 
+    /**
+     * Get names of features.
+     * @return a list of feature names.
+     */
     public String[] getFeatureNames() {
         SWIGTYPE_p_void buffer = LGBM_BoosterGetFeatureNamesSWIG(voidpp_value(handle));
         String[] result = StringArrayHandle_get_strings(buffer);
