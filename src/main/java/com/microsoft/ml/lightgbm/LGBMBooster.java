@@ -22,9 +22,11 @@ public class LGBMBooster {
     }
 
     public synchronized static void loadNative() throws IOException {
-        loadNative("com/microsoft/ml/lightgbm/linux/x86_64/lib_lightgbm.so", "lightgbm");
-        loadNative("com/microsoft/ml/lightgbm/linux/x86_64/lib_lightgbm_swig.so", "lightgbm_swig");
-        nativeLoaded = true;
+        if (!nativeLoaded) {
+            loadNative("com/microsoft/ml/lightgbm/linux/x86_64/lib_lightgbm.so", "lightgbm");
+            loadNative("com/microsoft/ml/lightgbm/linux/x86_64/lib_lightgbm_swig.so", "lightgbm_swig");
+            nativeLoaded = true;
+        }
     }
 
     private static void loadNative(String path, String name) throws IOException {
