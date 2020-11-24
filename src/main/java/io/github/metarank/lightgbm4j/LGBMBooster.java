@@ -48,7 +48,7 @@ public class LGBMBooster {
                 loadNative("windows/x86_64/lib_lightgbm_swig.dll", "lightgbm_swig");
                 nativeLoaded = true;
             } else {
-                System.out.println("Only Linux/Windows/Mac x86_64 are supported");
+                System.out.println("Only Linux/Windows/Mac on x86_64 are supported");
             }
         }
     }
