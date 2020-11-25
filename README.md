@@ -36,7 +36,7 @@ To install, use the following maven coordinates:
 <dependency>
   <groupId>io.github.metarank</groupId>
   <artifactId>lightgbm4j</artifactId>
-  <version>3.1.0-1</version>
+  <version>3.1.0-2</version>
 </dependency>
 ```
 
