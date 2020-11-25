@@ -68,7 +68,21 @@ LGBMBooster loaded = LGBMBooster.loadModelFromString(model);
 float[] input = new float[] {1.0f, 1.0f, 1.0f, 1.0f};
 double[] pred = booster.predictForMat(input, 2, 2, true);
 ```
+## Example
 
+```java
+// cancer dataset from https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Coimbra
+// with labels altered to fit the [0,1] range
+LGBMDataset dataset = LGBMDataset.createFromFile("cancer.csv", "header=true label=name:Classification");
+LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
+for (int i=0; i<10; i++) {
+     booster.updateOneIter();
+     double[] eval = booster.getEval(0);
+     System.out.println(eval[0]);
+}
+booster.close();
+dataset.close();
+```
 ## LightGBM API Coverage
 
 Not all LightGBM API methods are covered in this wrapper. PRs are welcome!

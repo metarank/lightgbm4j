@@ -11,7 +11,6 @@ public class CancerIntegrationTest {
     public void testCancer() throws IOException, LGBMException {
         LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification");
         LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
-        booster.addValidData(dataset);
         for (int i=0; i<10; i++) {
             booster.updateOneIter();
             double[] eval = booster.getEval(0);
