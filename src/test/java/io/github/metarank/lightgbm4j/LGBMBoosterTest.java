@@ -1,8 +1,5 @@
 package io.github.metarank.lightgbm4j;
 
-import io.github.metarank.lightgbm4j.LGBMBooster;
-import io.github.metarank.lightgbm4j.LGBMDataset;
-import io.github.metarank.lightgbm4j.LGBMException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -108,6 +105,68 @@ public class LGBMBoosterTest {
         double[] pred = booster.predictForMat(new double[] {1.0, 1.0, 1.0, 1.0}, 2, 2, true);
         assertTrue(pred.length > 0, "predicted values should not be empty");
         ds.close();
+        booster.close();
+    }
+
+    @Test
+    public void testAddValidData() throws LGBMException {
+        LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "");
+        LGBMBooster booster = LGBMBooster.create(ds, "");
+        booster.addValidData(ds);
+        ds.close();
+        booster.close();
+    }
+
+    @Test
+    public void testGetEval() throws LGBMException {
+        LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification");
+        LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
+        boolean finished = booster.updateOneIter();
+        double[] eval = booster.getEval(0);
+        assertTrue(eval.length > 0);
+        assertTrue(eval[0] > 0);
+        dataset.close();
+        booster.close();
+    }
+
+    @Test
+    public void testGetEvalNames() throws LGBMException {
+        LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification");
+        LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
+        booster.addValidData(dataset);
+        String[] eval = booster.getEvalNames();
+        assertTrue(eval.length > 0);
+        dataset.close();
+        booster.close();
+    }
+
+    @Test
+    public void testFeatureImportance() throws LGBMException {
+        LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification");
+        LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
+        booster.updateOneIter();
+        booster.updateOneIter();
+        booster.updateOneIter();
+        String[] names = booster.getFeatureNames();
+        double[] importance = booster.featureImportance(0, LGBMBooster.FeatureImportanceType.GAIN);
+        assertTrue(names.length > 0);
+        assertTrue(importance.length > 0);
+        dataset.close();
+        booster.close();
+    }
+
+    @Test
+    public void testPredictForMatSingleRow() throws LGBMException {
+        LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification");
+        LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
+        booster.updateOneIter();
+        booster.updateOneIter();
+        booster.updateOneIter();
+        double pred1 = booster.predictForMatSingleRow(new double[] {1,2,3,4,5,6,7,8,9});
+        assertTrue(pred1 > 0);
+        double pred2 = booster.predictForMatSingleRow(new float[] {1,2,3,4,5,6,7,8,9});
+        assertTrue(pred2 > 0);
+        dataset.close();
         booster.close();
     }
 }
