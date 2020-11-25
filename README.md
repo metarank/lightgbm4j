@@ -36,7 +36,7 @@ To install, use the following maven coordinates:
 <dependency>
   <groupId>io.github.metarank</groupId>
   <artifactId>lightgbm4j</artifactId>
-  <version>3.1.0-1</version>
+  <version>3.1.0-2</version>
 </dependency>
 ```
 
@@ -74,12 +74,18 @@ double[] pred = booster.predictForMat(input, 2, 2, true);
 Not all LightGBM API methods are covered in this wrapper. PRs are welcome!
 
 Supported methods:
+* [LGBM_BoosterAddValidData](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterAddValidData)
 * [LGBM_BoosterCreate](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterCreate)
 * [LGBM_BoosterCreateFromModelfile](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterCreateFromModelfile)
 * [LGBM_BoosterFree](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterFree)
+* [LGBM_BoosterGetEval](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetEval)
 * [LGBM_BoosterGetFeatureNames](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetFeatureNames)
+* [LGBM_BoosterFeatureImportance](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterFeatureImportance)
+* [LGBM_BoosterGetEvalNames](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetEvalNames)
+* [LGBM_BoosterGetNumFeature](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetNumFeature)
 * [LGBM_BoosterLoadModelFromString](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterLoadModelFromString)
 * [LGBM_BoosterPredictForMat](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictForMat)
+* [LGBM_BoosterPredictForMatSingleRow](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictForMatSingleRow)
 * [LGBM_BoosterSaveModel](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterSaveModel)
 * [LGBM_BoosterSaveModelToString](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterSaveModelToString)
 * [LGBM_BoosterUpdateOneIter](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterUpdateOneIter)
@@ -92,19 +98,14 @@ Supported methods:
 * [LGBM_GetLastError](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_GetLastError)
 
 Not yet supported:
-* [LGBM_BoosterAddValidData](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterAddValidData)
 * [LGBM_BoosterCalcNumPredict](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterCalcNumPredict)
 * [LGBM_BoosterDumpModel](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterDumpModel)
-* [LGBM_BoosterFeatureImportance](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterFeatureImportance)
 * [LGBM_BoosterFreePredictSparse](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterFreePredictSparse)
 * [LGBM_BoosterGetCurrentIteration](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetCurrentIteration)
-* [LGBM_BoosterGetEval](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetEval)
 * [LGBM_BoosterGetEvalCounts](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetEvalCounts)
-* [LGBM_BoosterGetEvalNames](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetEvalNames)
 * [LGBM_BoosterGetLeafValue](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetLeafValue)
 * [LGBM_BoosterGetLowerBoundValue](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetLowerBoundValue)
 * [LGBM_BoosterGetNumClasses](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetNumClasses)
-* [LGBM_BoosterGetNumFeature](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetNumFeature)
 * [LGBM_BoosterGetNumPredict](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetNumPredict) 
 * [LGBM_BoosterGetPredict](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetPredict)
 * [LGBM_BoosterGetUpperBoundValue](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetUpperBoundValue)
@@ -118,7 +119,6 @@ Not yet supported:
 * [LGBM_BoosterPredictForCSRSingleRowFastInit](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictForCSRSingleRowFastInit)
 * [LGBM_BoosterPredictForFile](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictForFile)
 * [LGBM_BoosterPredictForMats](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictForMats)
-* [LGBM_BoosterPredictForMatSingleRow](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictForMatSingleRow)
 * [LGBM_BoosterPredictForMatSingleRowFast](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictForMatSingleRowFast)
 * [LGBM_BoosterPredictForMatSingleRowFastInit](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictForMatSingleRowFastInit)
 * [LGBM_BoosterPredictSparseOutput](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictSparseOutput)
@@ -146,7 +146,6 @@ Not yet supported:
 * [LGBM_DatasetSetField](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetSetField)
 * [LGBM_DatasetUpdateParamChecking](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetUpdateParamChecking)
 * [LGBM_FastConfigFree](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_FastConfigFree)
-* []()
 
 
 ## License
