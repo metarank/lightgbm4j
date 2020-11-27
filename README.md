@@ -8,7 +8,7 @@ LightGBM API methods in Java-friendly flavour.
 
 ## Purpose
 
-LightGBM itself has a SWIG-generated JNI interface, which is possible to use directly from Java. The problem with SWIG wrappers
+LightGBM4j itself has a SWIG-generated JNI interface, which is possible to use directly from Java. The problem with SWIG wrappers
 is that they are extremely low-level. For example, to pass a java array thru SWIG, you need to do someting horrible:
 ```java
         SWIGTYPE_p_float dataBuffer = new_floatArray(input.length);
