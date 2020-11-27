@@ -2,6 +2,7 @@
 
 [![CI Status](https://github.com/metarank/lightgbm4j/workflows/Java%20CI%20with%20Maven/badge.svg)](https://github.com/metarank/lightgbm4j/actions)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.metarank/lightgbm4j/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/io.github.metarank/lightgbm4j)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 LightGBM is a zero-dependency Java wrapper for the LightGBM project. Its main goal is to provide an 1-1 mapping for all
 LightGBM API methods in Java-friendly flavour. 
