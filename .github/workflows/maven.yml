@@ -11,19 +11,20 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        java: [8, 11, 15]
     steps:
     - uses: actions/checkout@v2
       with:
         lfs: true
     - name: Checkout LFS objects
       run: git lfs checkout
-    - name: Set up JDK 11
+    - name: Set up JDK
       uses: actions/setup-java@v1
       with:
-        java-version: 11
+        java-version: ${{ matrix.java }}
 
     - name: Cache maven packages
       uses: actions/cache@v2
