@@ -60,11 +60,18 @@ public class LGBMBooster {
     private static void loadNative(String path, String name) throws IOException {
         System.out.println("Loading native lib " + path);
         String libPath = extractResource(path, name).getPath();
-        System.load(libPath);
+        File libFile = new File(libPath);
+        System.out.println("Extracted file: exists=" + libFile.exists() + " path="+ libFile);
+        try {
+            System.load(libPath);
+        } catch (UnsatisfiedLinkError err) {
+            System.out.println("Cannot load library: " + err + " cause: " + err.getMessage());
+        }
     }
 
     private static File extractResource(String path, String name) throws IOException {
         File tempFile = File.createTempFile(name + "_", ".bin" );
+        System.out.println("Loading native lib " + tempFile);
         InputStream libStream = LGBMBooster.class.getClassLoader().getResourceAsStream(path);
         OutputStream fileStream = new FileOutputStream(tempFile);
         copyStream(libStream, fileStream);
@@ -76,9 +83,12 @@ public class LGBMBooster {
     private static void copyStream(InputStream source, OutputStream target) throws IOException {
         byte[] buf = new byte[8192];
         int length;
+        int bytesCopied = 0;
         while ((length = source.read(buf)) > 0) {
             target.write(buf, 0, length);
+            bytesCopied += length;
         }
+        System.out.println("Copied " + bytesCopied + " bytes");
     }
 
     /**
