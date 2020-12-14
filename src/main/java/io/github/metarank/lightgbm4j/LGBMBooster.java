@@ -44,8 +44,8 @@ public class LGBMBooster {
                 loadNative("linux/x86_64/lib_lightgbm_swig.so", "lightgbm_swig");
                 nativeLoaded = true;
             } else if (os.startsWith("Mac")) {
-                loadNative("mac/x86_64/lib_lightgbm.dylib", "lightgbm");
-                loadNative("mac/x86_64/lib_lightgbm_swig.dylib", "lightgbm_swig");
+                loadNative("osx/x86_64/lib_lightgbm.dylib", "lightgbm");
+                loadNative("osx/x86_64/lib_lightgbm_swig.dylib", "lightgbm_swig");
                 nativeLoaded = true;
             } else if (os.startsWith("Windows")) {
                 loadNative("windows/x86_64/lib_lightgbm.dll", "lightgbm");
