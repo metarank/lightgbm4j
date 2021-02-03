@@ -64,6 +64,7 @@ public class LGBMDataset {
                 null,
                 handle
         );
+        delete_floatArray(dataBuffer);
         if (result < 0) {
             throw new LGBMException(LGBM_GetLastError());
         } else {
@@ -86,7 +87,6 @@ public class LGBMDataset {
         for (int i = 0; i < data.length; i++) {
             doubleArray_setitem(dataBuffer, i, data[i]);
         }
-
         int result = LGBM_DatasetCreateFromMat(
                 double_to_voidp_ptr(dataBuffer),
                 C_API_DTYPE_FLOAT64,
@@ -97,6 +97,7 @@ public class LGBMDataset {
                 null,
                 handle
         );
+        delete_doubleArray(dataBuffer);
         if (result < 0) {
             throw new LGBMException(LGBM_GetLastError());
         } else {
@@ -135,6 +136,90 @@ public class LGBMDataset {
             int numFeatures = intp_value(numFeaturesP);
             delete_intp(numFeaturesP);
             return numFeatures;
+        }
+    }
+
+    /**
+     * Set feature names
+     * @param featureNames a list of names.
+     * @throws LGBMException
+     */
+    public void setFeatureNames(String[] featureNames) throws LGBMException {
+        int result = LGBM_DatasetSetFeatureNames(handle, featureNames, featureNames.length);
+        if (result < 0) {
+            throw new LGBMException(LGBM_GetLastError());
+        }
+    }
+
+    /**
+     * Dumps dataset into a file for debugging.
+     * @param fileName
+     * @throws LGBMException
+     */
+    public void dumpText(String fileName) throws LGBMException {
+        int result = LGBM_DatasetDumpText(handle, fileName);
+        if (result < 0) {
+            throw new LGBMException(LGBM_GetLastError());
+        }
+    }
+
+    /**
+     * Sets a double field. label and weight fields can only be float[]
+     * @param fieldName
+     * @param data
+     * @throws LGBMException
+     */
+    public void setField(String fieldName, double[] data) throws LGBMException {
+        if (fieldName.equals("label")) throw new LGBMException("label can only be float[]");
+        if (fieldName.equals("weight")) throw new LGBMException("weight can only be float[]");
+        SWIGTYPE_p_double dataBuffer = new_doubleArray(data.length);
+        for (int i = 0; i < data.length; i++) {
+            doubleArray_setitem(dataBuffer, i, data[i]);
+        }
+
+        int result = LGBM_DatasetSetField(handle, fieldName, double_to_voidp_ptr(dataBuffer), data.length, C_API_DTYPE_FLOAT64);
+        delete_doubleArray(dataBuffer);
+        if (result < 0) {
+            throw new LGBMException(LGBM_GetLastError());
+        }
+    }
+
+    /**
+     * Sets an int field. It can only accept the group field.
+     * @param fieldName
+     * @param data
+     * @throws LGBMException
+     */
+    public void setField(String fieldName, int[] data) throws LGBMException {
+        if (!fieldName.equals("group")) throw new LGBMException("only group field can be int[]");
+        SWIGTYPE_p_int dataBuffer = new_intArray(data.length);
+        for (int i = 0; i < data.length; i++) {
+            intArray_setitem(dataBuffer, i, data[i]);
+        }
+
+        int result = LGBM_DatasetSetField(handle, fieldName, int_to_voidp_ptr(dataBuffer), data.length, C_API_DTYPE_INT32);
+        delete_intArray(dataBuffer);
+        if (result < 0) {
+            throw new LGBMException(LGBM_GetLastError());
+        }
+    }
+
+    /**
+     * Sets a double field. label and weight fields can only be float[]
+     * @param fieldName
+     * @param data
+     * @throws LGBMException
+     */
+    public void setField(String fieldName, float[] data) throws LGBMException {
+        SWIGTYPE_p_float dataBuffer = new_floatArray(data.length);
+        for (int i = 0; i < data.length; i++) {
+            floatArray_setitem(dataBuffer, i, data[i]);
+        }
+
+        int result = LGBM_DatasetSetField(handle, fieldName,float_to_voidp_ptr(dataBuffer), data.length, C_API_DTYPE_FLOAT32);
+        delete_floatArray(dataBuffer);
+        if (result < 0) {
+            throw new LGBMException(LGBM_GetLastError());
         }
     }
 
