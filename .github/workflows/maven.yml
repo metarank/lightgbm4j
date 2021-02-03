@@ -19,7 +19,7 @@ jobs:
     steps:
     - name: install libomp
       run: brew install libomp
-      if: matrix.platform == "macos-10.15"
+      if: runner.os == 'macOS'
     - uses: actions/checkout@v2
       with:
         lfs: true
