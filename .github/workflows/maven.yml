@@ -11,11 +11,15 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.platform }}
     strategy:
       matrix:
-        java: [8, 11, 15]
+        java: [11]
+        platform: [ubuntu-20.04, macos-10.15]
     steps:
+    - name: install libomp
+      run: brew install libomp
+      if: runner.os == 'macOS'
     - uses: actions/checkout@v2
       with:
         lfs: true
