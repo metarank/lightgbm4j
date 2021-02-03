@@ -60,6 +60,12 @@ Note that both `LGBMBooster` and `LGBMDataset` classes contain handles of native
 data structures from the LightGBM, so you need to explicitly call `.close()` when they are not used. Otherwise you may catch
 a native code memory leak.
 
+To load existing model and run it:
+```java
+LGBMBooster loaded = LGBMBooster.loadModelFromString(model);
+float[] input = new float[] {1.0f, 1.0f, 1.0f, 1.0f};
+double[] pred = booster.predictForMat(input, 2, 2, true);
+```
 
 To load dataset from java matrix:
 ```java
@@ -67,12 +73,50 @@ float[] matrix = new float[] {1.0f, 1.0f, 1.0f, 1.0f};
 LGBMDataset ds = LGBMDataset.createFromMat(matrix, 2, 2, true, "");
 ```
 
-To load existing model and run it:
+There are some rough parts in the LightGBM API in loading the dataset from matrices:
+* `createFromMat` parameters cannot set the [label](https://lightgbm.readthedocs.io/en/latest/Parameters.html#label_column) or [weight](https://lightgbm.readthedocs.io/en/latest/Parameters.html#weight_column) column. 
+So if you do `parameters = "label=some_column_name"`, it will be ignored by the LightGBM.
+* label/weight/group columns are magical and should NOT be included in the input matrix for
+`createFromMat`
+* to set these magical columns, you need to explicitly call `LGBMDataset.setField()` method.
+* `label` and `weight` columns [must be](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetSetField) `float[]`
+* `group` column [must be](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetSetField) `int[]`
+
+A full example of loading dataset from matrix for a cancer dataset:
 ```java
-LGBMBooster loaded = LGBMBooster.loadModelFromString(model);
-float[] input = new float[] {1.0f, 1.0f, 1.0f, 1.0f};
-double[] pred = booster.predictForMat(input, 2, 2, true);
+        String[] columns = new String[] {
+            "Age","BMI","Glucose","Insulin","HOMA","Leptin","Adiponectin","Resistin","MCP.1"
+        };
+        double[] values = new double[] {
+            71,30.3,102,8.34,2.098344,56.502,8.13,4.2989,200.976,
+            66,27.7,90,6.042,1.341324,24.846,7.652055,6.7052,225.88,
+            75,25.7,94,8.079,1.8732508,65.926,3.74122,4.49685,206.802,
+            78,25.3,60,3.508,0.519184,6.633,10.567295,4.6638,209.749,
+            69,29.4,89,10.704,2.3498848,45.272,8.2863,4.53,215.769,
+            85,26.6,96,4.462,1.0566016,7.85,7.9317,9.6135,232.006,
+            76,27.1,110,26.211,7.111918,21.778,4.935635,8.49395,45.843,
+            77,25.9,85,4.58,0.960273333,13.74,9.75326,11.774,488.829,
+            45,21.30394858,102,13.852,3.4851632,7.6476,21.056625,23.03408,552.444,
+            45,20.82999519,74,4.56,0.832352,7.7529,8.237405,28.0323,382.955,
+            49,20.9566075,94,12.305,2.853119333,11.2406,8.412175,23.1177,573.63,
+            34,24.24242424,92,21.699,4.9242264,16.7353,21.823745,12.06534,481.949,
+            42,21.35991456,93,2.999,0.6879706,19.0826,8.462915,17.37615,321.919,
+            68,21.08281329,102,6.2,1.55992,9.6994,8.574655,13.74244,448.799,
+            51,19.13265306,93,4.364,1.0011016,11.0816,5.80762,5.57055,90.6,
+            62,22.65625,92,3.482,0.790181867,9.8648,11.236235,10.69548,703.973
+        };
+        
+        float[] labels = new float[] {
+            0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1
+        };
+        LGBMDataset dataset = LGBMDataset.createFromMat(values, 16, columns.length, true, "");
+        dataset.setFeatureNames(columns);
+        dataset.setField("label", labels);
+        return dataset;
 ```
+
+Also see [a working example](https://github.com/metarank/lightgbm4j/blob/main/src/test/java/io/github/metarank/lightgbm4j/CancerIntegrationTest.java) 
+of different ways to deal with input datasets in the LightGBM4j tests.
 ## Example
 
 ```java
@@ -115,6 +159,9 @@ Supported methods:
 * [LGBM_DatasetGetNumData](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetGetNumData)
 * [LGBM_DatasetGetNumFeature](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetGetNumFeature)
 * [LGBM_GetLastError](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_GetLastError)
+* [LGBM_DatasetSetFeatureNames](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetSetFeatureNames)
+* [LGBM_DatasetSetField](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetSetField)
+* [LGBM_DatasetDumpText](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetDumpText)
 
 Not yet supported:
 * [LGBM_BoosterCalcNumPredict](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterCalcNumPredict)
@@ -155,14 +202,11 @@ Not yet supported:
 * [LGBM_DatasetCreateFromCSRFunc](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetCreateFromCSRFunc)
 * [LGBM_DatasetCreateFromMats](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetCreateFromMats)
 * [LGBM_DatasetCreateFromSampledColumn](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetCreateFromSampledColumn)
-* [LGBM_DatasetDumpText](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetDumpText)
 * [LGBM_DatasetGetField](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetGetField)
 * [LGBM_DatasetGetSubset](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetGetSubset)
 * [LGBM_DatasetPushRows](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetPushRows)
 * [LGBM_DatasetPushRowsByCSR](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetPushRowsByCSR)
 * [LGBM_DatasetSaveBinary](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetSaveBinary)
-* [LGBM_DatasetSetFeatureNames](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetSetFeatureNames)
-* [LGBM_DatasetSetField](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetSetField)
 * [LGBM_DatasetUpdateParamChecking](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetUpdateParamChecking)
 * [LGBM_FastConfigFree](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_FastConfigFree)
 
