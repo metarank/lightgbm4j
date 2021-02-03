@@ -41,7 +41,7 @@ To install, use the following maven coordinates:
 <dependency>
   <groupId>io.github.metarank</groupId>
   <artifactId>lightgbm4j</artifactId>
-  <version>3.1.1-2</version>
+  <version>3.1.1-4</version>
 </dependency>
 ```
 
@@ -132,6 +132,13 @@ for (int i=0; i<10; i++) {
 booster.close();
 dataset.close();
 ```
+
+## Supported platforms
+
+This code is tested to work well with Linux (Ubuntu 20.04) and MacOS 10.15. Supported Java versions are 8 and 11 (probably it will also work with anything >11).
+
+There are still some problems in running official LightGBM swig wrappers on Windows, see https://github.com/metarank/lightgbm4j/issues/28 for details.
+
 ## LightGBM API Coverage
 
 Not all LightGBM API methods are covered in this wrapper. PRs are welcome!
