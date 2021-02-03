@@ -46,4 +46,12 @@ public class LGBMDatasetTest {
         assertEquals(2, ds.getNumFeatures());
         ds.close();
     }
+
+    @Test void testSetFeatureNames() throws LGBMException {
+        LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "");
+        Assertions.assertDoesNotThrow( () -> {
+            ds.setFeatureNames(new String[] {"foo", "bar"});
+        });
+        ds.close();
+    }
 }
