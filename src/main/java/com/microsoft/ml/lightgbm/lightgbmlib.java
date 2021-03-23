@@ -105,6 +105,10 @@ public class lightgbmlib implements lightgbmlibConstants {
     return lightgbmlibJNI.LGBM_DatasetAddFeaturesFrom(SWIGTYPE_p_void.getCPtr(target), SWIGTYPE_p_void.getCPtr(source));
   }
 
+  public static int LGBM_BoosterGetLinear(SWIGTYPE_p_void handle, SWIGTYPE_p_bool out) {
+    return lightgbmlibJNI.LGBM_BoosterGetLinear(SWIGTYPE_p_void.getCPtr(handle), SWIGTYPE_p_bool.getCPtr(out));
+  }
+
   public static int LGBM_BoosterCreate(SWIGTYPE_p_void train_data, String parameters, SWIGTYPE_p_p_void out) {
     return lightgbmlibJNI.LGBM_BoosterCreate(SWIGTYPE_p_void.getCPtr(train_data), parameters, SWIGTYPE_p_p_void.getCPtr(out));
   }
@@ -459,6 +463,28 @@ public class lightgbmlib implements lightgbmlibConstants {
 
   public static int int32_tp_value(SWIGTYPE_p_int obj) {
     return lightgbmlibJNI.int32_tp_value(SWIGTYPE_p_int.getCPtr(obj));
+  }
+
+  public static SWIGTYPE_p_size_t new_size_tp() {
+    long cPtr = lightgbmlibJNI.new_size_tp();
+    return (cPtr == 0) ? null : new SWIGTYPE_p_size_t(cPtr, false);
+  }
+
+  public static SWIGTYPE_p_size_t copy_size_tp(long value) {
+    long cPtr = lightgbmlibJNI.copy_size_tp(value);
+    return (cPtr == 0) ? null : new SWIGTYPE_p_size_t(cPtr, false);
+  }
+
+  public static void delete_size_tp(SWIGTYPE_p_size_t obj) {
+    lightgbmlibJNI.delete_size_tp(SWIGTYPE_p_size_t.getCPtr(obj));
+  }
+
+  public static void size_tp_assign(SWIGTYPE_p_size_t obj, long value) {
+    lightgbmlibJNI.size_tp_assign(SWIGTYPE_p_size_t.getCPtr(obj), value);
+  }
+
+  public static long size_tp_value(SWIGTYPE_p_size_t obj) {
+    return lightgbmlibJNI.size_tp_value(SWIGTYPE_p_size_t.getCPtr(obj));
   }
 
   public static SWIGTYPE_p_long int64_t_to_long_ptr(SWIGTYPE_p_long_long x) {
