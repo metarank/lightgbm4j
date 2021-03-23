@@ -3,6 +3,8 @@ package io.github.metarank.lightgbm4j;
 import com.microsoft.ml.lightgbm.*;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static com.microsoft.ml.lightgbm.lightgbmlib.*;
 
@@ -40,16 +42,16 @@ public class LGBMBooster {
         if (!nativeLoaded) {
             String os = System.getProperty("os.name");
             if (os.startsWith("Linux") || os.startsWith("LINUX")) {
-                loadNative("linux/x86_64/lib_lightgbm.so", "lightgbm");
-                loadNative("linux/x86_64/lib_lightgbm_swig.so", "lightgbm_swig");
+                loadNative("linux/x86_64/lib_lightgbm.so", "lib_lightgbm.so");
+                loadNative("linux/x86_64/lib_lightgbm_swig.so", "lib_lightgbm_swig.so");
                 nativeLoaded = true;
             } else if (os.startsWith("Mac")) {
-                loadNative("osx/x86_64/lib_lightgbm.dylib", "lightgbm");
-                loadNative("osx/x86_64/lib_lightgbm_swig.dylib", "lightgbm_swig");
+                loadNative("osx/x86_64/lib_lightgbm.dylib", "lib_lightgbm.dylib");
+                loadNative("osx/x86_64/lib_lightgbm_swig.dylib", "lib_lightgbm_swig.dylib");
                 nativeLoaded = true;
             } else if (os.startsWith("Windows")) {
-                loadNative("windows/x86_64/lib_lightgbm.dll", "lightgbm");
-                loadNative("windows/x86_64/lib_lightgbm_swig.dll", "lightgbm_swig");
+                loadNative("windows/x86_64/lib_lightgbm.dll", "lib_lightgbm.dll");
+                loadNative("windows/x86_64/lib_lightgbm_swig.dll", "lib_lightgbm_swig.dll");
                 nativeLoaded = true;
             } else {
                 System.out.println("Only Linux/Windows/Mac on x86_64 are supported");
@@ -70,7 +72,8 @@ public class LGBMBooster {
     }
 
     private static File extractResource(String path, String name) throws IOException {
-        File tempFile = File.createTempFile(name + "_", ".bin" );
+        Path dir = Files.createTempDirectory("lightgbm");
+        File tempFile = new File(dir.toString() + "/" + name);
         System.out.println("Loading native lib " + tempFile);
         InputStream libStream = LGBMBooster.class.getClassLoader().getResourceAsStream(path);
         OutputStream fileStream = new FileOutputStream(tempFile);
