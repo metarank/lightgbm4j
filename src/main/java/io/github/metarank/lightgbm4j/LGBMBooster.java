@@ -305,6 +305,7 @@ public class LGBMBooster {
                 MODEL_SAVE_BUFFER_SIZE,
                 outLength
         );
+        delete_int64_tp(outLength);
         return result;
     }
 
