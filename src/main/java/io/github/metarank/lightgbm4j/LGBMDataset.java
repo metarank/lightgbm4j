@@ -6,7 +6,7 @@ import java.io.IOException;
 
 import static com.microsoft.ml.lightgbm.lightgbmlib.*;
 
-public class LGBMDataset {
+public class LGBMDataset implements AutoCloseable {
     public SWIGTYPE_p_void handle;
     static {
         try {
@@ -227,6 +227,7 @@ public class LGBMDataset {
      * Deallocate all native memory for the LightGBM dataset.
      * @throws LGBMException
      */
+    @Override
     public void close() throws LGBMException {
         int result = LGBM_DatasetFree(handle);
         if (result < 0) {

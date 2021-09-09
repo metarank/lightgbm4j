@@ -8,7 +8,7 @@ import java.nio.file.Path;
 
 import static com.microsoft.ml.lightgbm.lightgbmlib.*;
 
-public class LGBMBooster {
+public class LGBMBooster implements AutoCloseable {
     private int iterations;
     private SWIGTYPE_p_p_void handle;
 
@@ -146,6 +146,7 @@ public class LGBMBooster {
      * Deallocate all native memory for the LightGBM model.
      * @throws LGBMException
      */
+    @Override
     public void close() throws LGBMException {
         int result = LGBM_BoosterFree(voidpp_value(handle));
         if (result < 0) {
