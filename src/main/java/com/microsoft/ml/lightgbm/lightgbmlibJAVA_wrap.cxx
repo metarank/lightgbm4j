@@ -789,7 +789,7 @@ void * int64_t_to_voidp_ptr(int64_t * x) {
     StringArrayHandle StringArrayHandle_create(size_t num_strings, size_t string_size) {
         try {
             return new StringArray(num_strings, string_size);
-        } catch (std::bad_alloc &e) {
+        } catch (std::bad_alloc &/*e*/) {
             return nullptr;
         }
     }
@@ -884,7 +884,7 @@ void * int64_t_to_voidp_ptr(int64_t * x) {
 
         try {
             strings.reset(new StringArray(eval_counts, string_size));
-        } catch (std::bad_alloc &e) {
+        } catch (std::bad_alloc &/*e*/) {
             LGBM_SetLastError("Failure to allocate memory.");
             return nullptr;
         }
@@ -922,7 +922,7 @@ void * int64_t_to_voidp_ptr(int64_t * x) {
 
         try {
             strings.reset(new StringArray(num_features, max_feature_name_size));
-        } catch (std::bad_alloc &e) {
+        } catch (std::bad_alloc &/*e*/) {
             LGBM_SetLastError("Failure to allocate memory.");
             return nullptr;
         }
@@ -934,6 +934,46 @@ void * int64_t_to_voidp_ptr(int64_t * x) {
 
         return strings.release();
     }
+
+
+    /**
+     * @brief Wraps LGBM_DatasetGetFeatureNames. Has the same limitations as a
+     * LGBM_BoosterGetFeatureNames:
+     *
+     * Allocates a new StringArray. You must free it yourself if it succeeds.
+     * @see StringArrayHandle_free().
+     * In case of failure such resource is freed and nullptr is returned.
+     * Check for that case with null (lightgbmlib) or 0 (lightgbmlibJNI).
+     *
+     * @param handle Booster handle
+     * @return StringArrayHandle with the feature names (or nullptr in case of error)
+     */
+    StringArrayHandle LGBM_DatasetGetFeatureNamesSWIG(BoosterHandle handle)
+    {
+        int num_features;
+        size_t max_feature_name_size;
+        std::unique_ptr<StringArray> strings(nullptr);
+
+        // Retrieve required allocation space:
+        API_OK_OR_NULL(LGBM_DatasetGetFeatureNames(handle,
+                                                   0, &num_features,
+                                                   0, &max_feature_name_size,
+                                                   nullptr));
+        try {
+            strings.reset(new StringArray(num_features, max_feature_name_size));
+        } catch (std::bad_alloc &/*e*/) {
+            LGBM_SetLastError("Failure to allocate memory.");
+            return nullptr;
+        }
+
+        API_OK_OR_NULL(LGBM_DatasetGetFeatureNames(handle,
+                                                   num_features, &num_features,
+                                                   max_feature_name_size, &max_feature_name_size,
+                                                   strings->data()));
+
+        return strings.release();
+    }
+
 
 
 #include "../include/LightGBM/utils/chunked_array.hpp"
@@ -1109,6 +1149,54 @@ SWIGEXPORT jint JNICALL Java_com_microsoft_ml_lightgbm_lightgbmlibJNI_LGBM_1Regi
   arg1 = *(void (**)(char const *))&jarg1; 
   result = (int)LGBM_RegisterLogCallback(arg1);
   jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_microsoft_ml_lightgbm_lightgbmlibJNI_LGBM_1GetSampleCount(JNIEnv *jenv, jclass jcls, jint jarg1, jstring jarg2, jlong jarg3) {
+  jint jresult = 0 ;
+  int32_t arg1 ;
+  char *arg2 = (char *) 0 ;
+  int *arg3 = (int *) 0 ;
+  int result;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = (int32_t)jarg1; 
+  arg2 = 0;
+  if (jarg2) {
+    arg2 = (char *)jenv->GetStringUTFChars(jarg2, 0);
+    if (!arg2) return 0;
+  }
+  arg3 = *(int **)&jarg3; 
+  result = (int)LGBM_GetSampleCount(arg1,(char const *)arg2,arg3);
+  jresult = (jint)result; 
+  if (arg2) jenv->ReleaseStringUTFChars(jarg2, (const char *)arg2);
+  return jresult;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_microsoft_ml_lightgbm_lightgbmlibJNI_LGBM_1SampleIndices(JNIEnv *jenv, jclass jcls, jint jarg1, jstring jarg2, jlong jarg3, jlong jarg4) {
+  jint jresult = 0 ;
+  int32_t arg1 ;
+  char *arg2 = (char *) 0 ;
+  void *arg3 = (void *) 0 ;
+  int32_t *arg4 = (int32_t *) 0 ;
+  int result;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = (int32_t)jarg1; 
+  arg2 = 0;
+  if (jarg2) {
+    arg2 = (char *)jenv->GetStringUTFChars(jarg2, 0);
+    if (!arg2) return 0;
+  }
+  arg3 = *(void **)&jarg3; 
+  arg4 = *(int32_t **)&jarg4; 
+  result = (int)LGBM_SampleIndices(arg1,(char const *)arg2,arg3,arg4);
+  jresult = (jint)result; 
+  if (arg2) jenv->ReleaseStringUTFChars(jarg2, (const char *)arg2);
   return jresult;
 }
 
@@ -4306,6 +4394,20 @@ SWIGEXPORT jlong JNICALL Java_com_microsoft_ml_lightgbm_lightgbmlibJNI_LGBM_1Boo
   (void)jcls;
   arg1 = *(BoosterHandle *)&jarg1; 
   result = (StringArrayHandle)LGBM_BoosterGetFeatureNamesSWIG(arg1);
+  *(StringArrayHandle *)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_microsoft_ml_lightgbm_lightgbmlibJNI_LGBM_1DatasetGetFeatureNamesSWIG(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  jlong jresult = 0 ;
+  BoosterHandle arg1 = (BoosterHandle) 0 ;
+  StringArrayHandle result;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(BoosterHandle *)&jarg1; 
+  result = (StringArrayHandle)LGBM_DatasetGetFeatureNamesSWIG(arg1);
   *(StringArrayHandle *)&jresult = result; 
   return jresult;
 }
