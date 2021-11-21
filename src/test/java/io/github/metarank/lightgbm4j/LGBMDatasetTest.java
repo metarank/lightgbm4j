@@ -5,8 +5,7 @@ import io.github.metarank.lightgbm4j.LGBMException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class LGBMDatasetTest {
@@ -52,6 +51,16 @@ public class LGBMDatasetTest {
         Assertions.assertDoesNotThrow( () -> {
             ds.setFeatureNames(new String[] {"foo", "bar"});
         });
+        ds.close();
+    }
+
+    @Test void testGetFeatureNames() throws LGBMException {
+        LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "");
+        Assertions.assertDoesNotThrow( () -> {
+            ds.setFeatureNames(new String[] {"foo", "bar"});
+        });
+        String[] names = ds.getFeatureNames();
+        assertArrayEquals(names, new String[] {"foo", "bar"});
         ds.close();
     }
 }

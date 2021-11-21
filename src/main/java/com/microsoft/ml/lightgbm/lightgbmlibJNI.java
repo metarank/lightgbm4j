@@ -23,6 +23,8 @@ public class lightgbmlibJNI {
   public final static native int C_API_FEATURE_IMPORTANCE_GAIN_get();
   public final static native String LGBM_GetLastError();
   public final static native int LGBM_RegisterLogCallback(long jarg1);
+  public final static native int LGBM_GetSampleCount(int jarg1, String jarg2, long jarg3);
+  public final static native int LGBM_SampleIndices(int jarg1, String jarg2, long jarg3, long jarg4);
   public final static native int LGBM_DatasetCreateFromFile(String jarg1, String jarg2, long jarg3, long jarg4);
   public final static native int LGBM_DatasetCreateFromSampledColumn(long jarg1, long jarg2, int jarg3, long jarg4, int jarg5, int jarg6, String jarg7, long jarg8);
   public final static native int LGBM_DatasetCreateByReference(long jarg1, long jarg2, long jarg3);
@@ -188,6 +190,7 @@ public class lightgbmlibJNI {
   public final static native long StringArrayHandle_get_num_elements(long jarg1);
   public final static native long LGBM_BoosterGetEvalNamesSWIG(long jarg1);
   public final static native long LGBM_BoosterGetFeatureNamesSWIG(long jarg1);
+  public final static native long LGBM_DatasetGetFeatureNamesSWIG(long jarg1);
   public final static native long new_int32ChunkedArray(long jarg1);
   public final static native void delete_int32ChunkedArray(long jarg1);
   public final static native void int32ChunkedArray_add(long jarg1, int32ChunkedArray jarg1_, int jarg2);

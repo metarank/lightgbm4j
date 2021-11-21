@@ -224,6 +224,18 @@ public class LGBMDataset implements AutoCloseable {
     }
 
     /**
+     * Gets feature names from dataset, if dataset supports it.
+     * @return list of feature names
+     * @throws LGBMException
+     */
+    public String[] getFeatureNames() throws LGBMException {
+        SWIGTYPE_p_void arrayHandle = LGBM_DatasetGetFeatureNamesSWIG(handle);
+        String[] names = StringArrayHandle_get_strings(arrayHandle);
+        StringArrayHandle_free(arrayHandle);
+        return names;
+    }
+
+    /**
      * Deallocate all native memory for the LightGBM dataset.
      * @throws LGBMException
      */

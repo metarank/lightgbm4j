@@ -17,6 +17,14 @@ public class lightgbmlib implements lightgbmlibConstants {
     return lightgbmlibJNI.LGBM_RegisterLogCallback(SWIGTYPE_p_f_p_q_const__char__void.getCPtr(callback));
   }
 
+  public static int LGBM_GetSampleCount(int num_total_row, String parameters, SWIGTYPE_p_int out) {
+    return lightgbmlibJNI.LGBM_GetSampleCount(num_total_row, parameters, SWIGTYPE_p_int.getCPtr(out));
+  }
+
+  public static int LGBM_SampleIndices(int num_total_row, String parameters, SWIGTYPE_p_void out, SWIGTYPE_p_int out_len) {
+    return lightgbmlibJNI.LGBM_SampleIndices(num_total_row, parameters, SWIGTYPE_p_void.getCPtr(out), SWIGTYPE_p_int.getCPtr(out_len));
+  }
+
   public static int LGBM_DatasetCreateFromFile(String filename, String parameters, SWIGTYPE_p_void reference, SWIGTYPE_p_p_void out) {
     return lightgbmlibJNI.LGBM_DatasetCreateFromFile(filename, parameters, SWIGTYPE_p_void.getCPtr(reference), SWIGTYPE_p_p_void.getCPtr(out));
   }
@@ -661,6 +669,11 @@ public class lightgbmlib implements lightgbmlibConstants {
 
   public static SWIGTYPE_p_void LGBM_BoosterGetFeatureNamesSWIG(SWIGTYPE_p_void handle) {
     long cPtr = lightgbmlibJNI.LGBM_BoosterGetFeatureNamesSWIG(SWIGTYPE_p_void.getCPtr(handle));
+    return (cPtr == 0) ? null : new SWIGTYPE_p_void(cPtr, false);
+  }
+
+  public static SWIGTYPE_p_void LGBM_DatasetGetFeatureNamesSWIG(SWIGTYPE_p_void handle) {
+    long cPtr = lightgbmlibJNI.LGBM_DatasetGetFeatureNamesSWIG(SWIGTYPE_p_void.getCPtr(handle));
     return (cPtr == 0) ? null : new SWIGTYPE_p_void(cPtr, false);
   }
 
