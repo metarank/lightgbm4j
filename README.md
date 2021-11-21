@@ -4,13 +4,13 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.metarank/lightgbm4j/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/io.github.metarank/lightgbm4j)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**LightGBM4j** is a zero-dependency Java wrapper for the LightGBM project. Its main goal is to provide an 1-1 mapping for all
-LightGBM API methods in Java-friendly flavour. 
+**LightGBM4j** is a zero-dependency Java wrapper for the LightGBM project. Its main goal is to provide a 1-1 mapping for all
+LightGBM API methods in a Java-friendly flavor. 
 
 ## Purpose
 
 LightGBM itself has a SWIG-generated JNI interface, which is possible to use directly from Java. The problem with SWIG wrappers
-is that they are extremely low-level. For example, to pass a java array thru SWIG, you need to do someting horrible:
+is that they are extremely low-level. For example, to pass a java array thru SWIG, you need to do something horrible:
 ```java
         SWIGTYPE_p_float dataBuffer = new_floatArray(input.length);
         for (int i = 0; i < input.length; i++) {
@@ -31,8 +31,8 @@ This wrapper does all the dirty job for you:
 * supports both `float[]` and `double[]` API flavours.
 * reduces the amount of boilerplate for basic tasks.
 
-The library is in an early development stage and not covering all 100% of LightGBM API, but eventual future goal will be 
-merging with the upstream LightGBM and to become an official Java bindings for the project.
+The library is in an early development stage and does not cover all 100% of LightGBM API, but the eventual future 
+goal will be merging with the upstream LightGBM and becoming an official Java binding for the project.
 
 ## Installation
 
@@ -41,7 +41,7 @@ To install, use the following maven coordinates:
 <dependency>
   <groupId>io.github.metarank</groupId>
   <artifactId>lightgbm4j</artifactId>
-  <version>3.2.1-1</version>
+  <version>3.3.1-1</version>
 </dependency>
 ```
 
@@ -57,17 +57,17 @@ There are two main classes available:
 All the public API methods in these classes should map to the [LightGBM C API](https://lightgbm.readthedocs.io/en/latest/C-API.html) methods directly.
 
 Note that both `LGBMBooster` and `LGBMDataset` classes contain handles of native memory
-data structures from the LightGBM, so you need to explicitly call `.close()` when they are not used. Otherwise you may catch
+data structures from the LightGBM, so you need to explicitly call `.close()` when they are not used. Otherwise, you may catch
 a native code memory leak.
 
-To load existing model and run it:
+To load an existing model and run it:
 ```java
 LGBMBooster loaded = LGBMBooster.loadModelFromString(model);
 float[] input = new float[] {1.0f, 1.0f, 1.0f, 1.0f};
 double[] pred = booster.predictForMat(input, 2, 2, true);
 ```
 
-To load dataset from java matrix:
+To load a dataset from a java matrix:
 ```java
 float[] matrix = new float[] {1.0f, 1.0f, 1.0f, 1.0f};
 LGBMDataset ds = LGBMDataset.createFromMat(matrix, 2, 2, true, "");
@@ -82,7 +82,7 @@ So if you do `parameters = "label=some_column_name"`, it will be ignored by the 
 * `label` and `weight` columns [must be](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetSetField) `float[]`
 * `group` column [must be](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetSetField) `int[]`
 
-A full example of loading dataset from matrix for a cancer dataset:
+A full example of loading dataset from a matrix for a cancer dataset:
 ```java
         String[] columns = new String[] {
             "Age","BMI","Glucose","Insulin","HOMA","Leptin","Adiponectin","Resistin","MCP.1"
@@ -115,7 +115,7 @@ A full example of loading dataset from matrix for a cancer dataset:
         return dataset;
 ```
 
-Also see [a working example](https://github.com/metarank/lightgbm4j/blob/main/src/test/java/io/github/metarank/lightgbm4j/CancerIntegrationTest.java) 
+Also, see [a working example](https://github.com/metarank/lightgbm4j/blob/main/src/test/java/io/github/metarank/lightgbm4j/CancerIntegrationTest.java) 
 of different ways to deal with input datasets in the LightGBM4j tests.
 ## Example
 
@@ -135,7 +135,8 @@ dataset.close();
 
 ## Supported platforms
 
-This code is tested to work well with Linux (Ubuntu 20.04), Windows (Server 2019) and MacOS 10.15. Supported Java versions are 8 and 11 (probably it will also work with anything >11).
+This code is tested to work well with Linux (Ubuntu 20.04), Windows (Server 2019) and MacOS 10.15/11. 
+Supported Java versions are 8, 11 and 17.
 
 ## LightGBM API Coverage
 
