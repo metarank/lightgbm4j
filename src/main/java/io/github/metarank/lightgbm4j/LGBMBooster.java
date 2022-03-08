@@ -61,26 +61,28 @@ public class LGBMBooster implements AutoCloseable {
 
     private static void loadNative(String path, String name) throws IOException {
         System.out.println("Loading native lib " + path);
-        String libPath = extractResource(path, name).getPath();
-        File libFile = new File(libPath);
+        String tmp = System.getProperty("java.io.tmpdir");
+        File libFile = new File(tmp + File.separator + name);
+        if (libFile.exists()) {
+            System.out.println(libFile + " already exists");
+        } else {
+            extractResource(path, name, libFile);
+        }
         System.out.println("Extracted file: exists=" + libFile.exists() + " path="+ libFile);
         try {
-            System.load(libPath);
+            System.load(libFile.toString());
         } catch (UnsatisfiedLinkError err) {
             System.out.println("Cannot load library: " + err + " cause: " + err.getMessage());
         }
     }
 
-    private static File extractResource(String path, String name) throws IOException {
-        Path dir = Files.createTempDirectory("lightgbm");
-        File tempFile = new File(dir.toString() + "/" + name);
-        System.out.println("Loading native lib " + tempFile);
+    private static void extractResource(String path, String name, File dest) throws IOException {
+        System.out.println("Extracting native lib " + dest);
         InputStream libStream = LGBMBooster.class.getClassLoader().getResourceAsStream(path);
-        OutputStream fileStream = new FileOutputStream(tempFile);
+        OutputStream fileStream = new FileOutputStream(dest);
         copyStream(libStream, fileStream);
         libStream.close();
         fileStream.close();
-        return tempFile;
     }
 
     private static void copyStream(InputStream source, OutputStream target) throws IOException {
