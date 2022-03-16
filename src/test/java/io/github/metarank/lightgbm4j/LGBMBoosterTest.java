@@ -1,5 +1,6 @@
 package io.github.metarank.lightgbm4j;
 
+import com.microsoft.ml.lightgbm.PredictionType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -91,7 +92,7 @@ public class LGBMBoosterTest {
         LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "");
         LGBMBooster booster = LGBMBooster.create(ds, "");
         boolean finished = booster.updateOneIter();
-        double[] pred = booster.predictForMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true);
+        double[] pred = booster.predictForMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, PredictionType.C_API_PREDICT_NORMAL);
         assertTrue(pred.length > 0, "predicted values should not be empty");
         ds.close();
         booster.close();
@@ -102,7 +103,7 @@ public class LGBMBoosterTest {
         LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "");
         LGBMBooster booster = LGBMBooster.create(ds, "");
         boolean finished = booster.updateOneIter();
-        double[] pred = booster.predictForMat(new double[] {1.0, 1.0, 1.0, 1.0}, 2, 2, true);
+        double[] pred = booster.predictForMat(new double[] {1.0, 1.0, 1.0, 1.0}, 2, 2, true, PredictionType.C_API_PREDICT_NORMAL);
         assertTrue(pred.length > 0, "predicted values should not be empty");
         ds.close();
         booster.close();
@@ -162,9 +163,9 @@ public class LGBMBoosterTest {
         booster.updateOneIter();
         booster.updateOneIter();
         booster.updateOneIter();
-        double pred1 = booster.predictForMatSingleRow(new double[] {1,2,3,4,5,6,7,8,9});
+        double pred1 = booster.predictForMatSingleRow(new double[] {1,2,3,4,5,6,7,8,9}, PredictionType.C_API_PREDICT_NORMAL);
         assertTrue(pred1 > 0);
-        double pred2 = booster.predictForMatSingleRow(new float[] {1,2,3,4,5,6,7,8,9});
+        double pred2 = booster.predictForMatSingleRow(new float[] {1,2,3,4,5,6,7,8,9}, PredictionType.C_API_PREDICT_NORMAL);
         assertTrue(pred2 > 0);
         dataset.close();
         booster.close();
