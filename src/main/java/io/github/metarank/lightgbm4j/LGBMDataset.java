@@ -27,9 +27,9 @@ public class LGBMDataset implements AutoCloseable {
      * @return
      * @throws LGBMException
      */
-    public static LGBMDataset createFromFile(String fileName, String parameters) throws LGBMException {
+    public static LGBMDataset createFromFile(String fileName, String parameters, LGBMDataset reference) throws LGBMException {
         SWIGTYPE_p_p_void handle = new_voidpp();
-        int result = LGBM_DatasetCreateFromFile(fileName, parameters, null, handle);
+        int result = LGBM_DatasetCreateFromFile(fileName, parameters, reference == null ? null : reference.handle, handle);
         if (result < 0) {
             throw new LGBMException(LGBM_GetLastError());
         } else {
@@ -47,7 +47,7 @@ public class LGBMDataset implements AutoCloseable {
      * @return
      * @throws LGBMException
      */
-    public static LGBMDataset createFromMat(float[] data, int rows, int cols, boolean isRowMajor, String parameters) throws LGBMException {
+    public static LGBMDataset createFromMat(float[] data, int rows, int cols, boolean isRowMajor, String parameters, LGBMDataset reference) throws LGBMException {
         SWIGTYPE_p_p_void handle = new_voidpp();
         SWIGTYPE_p_float dataBuffer = new_floatArray(data.length);
         for (int i = 0; i < data.length; i++) {
@@ -61,7 +61,7 @@ public class LGBMDataset implements AutoCloseable {
                 cols,
                 isRowMajor ? 1 : 0,
                 parameters,
-                null,
+                reference == null ? null : reference.handle,
                 handle
         );
         delete_floatArray(dataBuffer);
@@ -78,10 +78,11 @@ public class LGBMDataset implements AutoCloseable {
      * @param cols number of cols
      * @param isRowMajor is a row-major encoding used?
      * @param parameters extra parameters
+     * @param reference to align bin mappers with other dataset
      * @return
      * @throws LGBMException
      */
-    public static LGBMDataset createFromMat(double[] data, int rows, int cols, boolean isRowMajor, String parameters) throws LGBMException {
+    public static LGBMDataset createFromMat(double[] data, int rows, int cols, boolean isRowMajor, String parameters, LGBMDataset reference) throws LGBMException {
         SWIGTYPE_p_p_void handle = new_voidpp();
         SWIGTYPE_p_double dataBuffer = new_doubleArray(data.length);
         for (int i = 0; i < data.length; i++) {
@@ -94,7 +95,7 @@ public class LGBMDataset implements AutoCloseable {
                 cols,
                 isRowMajor ? 1 : 0,
                 parameters,
-                null,
+                reference == null ? null : reference.handle,
                 handle
         );
         delete_doubleArray(dataBuffer);

@@ -70,7 +70,7 @@ double[] pred = booster.predictForMat(input, 2, 2, true);
 To load a dataset from a java matrix:
 ```java
 float[] matrix = new float[] {1.0f, 1.0f, 1.0f, 1.0f};
-LGBMDataset ds = LGBMDataset.createFromMat(matrix, 2, 2, true, "");
+LGBMDataset ds = LGBMDataset.createFromMat(matrix, 2, 2, true, "", null);
 ```
 
 There are some rough parts in the LightGBM API in loading the dataset from matrices:
@@ -109,7 +109,7 @@ A full example of loading dataset from a matrix for a cancer dataset:
         float[] labels = new float[] {
             0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1
         };
-        LGBMDataset dataset = LGBMDataset.createFromMat(values, 16, columns.length, true, "");
+        LGBMDataset dataset = LGBMDataset.createFromMat(values, 16, columns.length, true, "", null);
         dataset.setFeatureNames(columns);
         dataset.setField("label", labels);
         return dataset;
@@ -122,15 +122,20 @@ of different ways to deal with input datasets in the LightGBM4j tests.
 ```java
 // cancer dataset from https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Coimbra
 // with labels altered to fit the [0,1] range
-LGBMDataset dataset = LGBMDataset.createFromFile("cancer.csv", "header=true label=name:Classification");
-LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
+LGBMDataset train = LGBMDataset.createFromFile("cancer.csv", "header=true label=name:Classification", null);
+LGBMDataset test = LGBMDataset.createFromFile("cancer-test.csv", "header=true label=name:Classification", train);
+LGBMBooster booster = LGBMBooster.create(train, "objective=binary label=name:Classification");
+booster.addValidData(test);
+
 for (int i=0; i<10; i++) {
      booster.updateOneIter();
-     double[] eval = booster.getEval(0);
-     System.out.println(eval[0]);
+     double[] evalTrain = booster.getEval(0);
+     double[] evalTest = booster.getEval(1);
+     System.out.println("train: " + eval[0] + " test: " + );
 }
 booster.close();
-dataset.close();
+train.close();
+test.close();
 ```
 
 ## Supported platforms

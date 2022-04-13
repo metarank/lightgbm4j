@@ -43,7 +43,7 @@ public class CancerIntegrationTest {
         );
     }
     private static LGBMDataset datasetFromFile() throws LGBMException, IOException {
-        LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification");
+        LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification", null);
         return dataset;
     }
 
@@ -75,7 +75,7 @@ public class CancerIntegrationTest {
             labels[i] = labelsBuffer.get(i);
         }
         reader.close();
-        LGBMDataset dataset = LGBMDataset.createFromMat(values, rows, names.length, true, "");
+        LGBMDataset dataset = LGBMDataset.createFromMat(values, rows, names.length, true, "", null);
         dataset.setFeatureNames(names);
         dataset.setField("label", labels);
         return dataset;
@@ -107,7 +107,7 @@ public class CancerIntegrationTest {
         float[] labels = new float[] {
                 0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1
         };
-        LGBMDataset dataset = LGBMDataset.createFromMat(values, 16, columns.length, true, "");
+        LGBMDataset dataset = LGBMDataset.createFromMat(values, 16, columns.length, true, "", null);
         dataset.setFeatureNames(columns);
         dataset.setField("label", labels);
         return dataset;
