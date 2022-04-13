@@ -162,10 +162,11 @@ public class LGBMBooster implements AutoCloseable {
      * @param rows number of rows
      * @param cols number of cols
      * @param isRowMajor is the 1d encoding a row-major?
+     * @param predictionType the prediction type
      * @return array of predictions
      * @throws LGBMException
      */
-    public double[] predictForMat(float[] input, int rows, int cols, boolean isRowMajor) throws LGBMException {
+    public double[] predictForMat(float[] input, int rows, int cols, boolean isRowMajor, PredictionType predictionType) throws LGBMException {
         SWIGTYPE_p_float dataBuffer = new_floatArray(input.length);
         for (int i = 0; i < input.length; i++) {
             floatArray_setitem(dataBuffer, i, input[i]);
@@ -179,7 +180,7 @@ public class LGBMBooster implements AutoCloseable {
                 rows,
                 cols,
                 isRowMajor ? 1 : 0,
-                C_API_PREDICT_NORMAL,
+                predictionType.getType(),
                 0,
                 iterations,
                 "",
@@ -207,12 +208,13 @@ public class LGBMBooster implements AutoCloseable {
      * @param input input matrix, as a 1D array. Size should be rows * cols.
      * @param rows number of rows
      * @param cols number of cols
-     * @param isRowMajor is the 1d encoding a row-major?
+     * @param isRowMajor is the 1 d encoding a row-major?
+     * @param predictionType the prediction type
      * @return array of predictions
      * @throws LGBMException
      */
 
-    public double[] predictForMat(double[] input, int rows, int cols, boolean isRowMajor) throws LGBMException {
+    public double[] predictForMat(double[] input, int rows, int cols, boolean isRowMajor, PredictionType predictionType) throws LGBMException {
         SWIGTYPE_p_double dataBuffer = new_doubleArray(input.length);
         for (int i = 0; i < input.length; i++) {
             doubleArray_setitem(dataBuffer, i, input[i]);
@@ -226,7 +228,7 @@ public class LGBMBooster implements AutoCloseable {
                 rows,
                 cols,
                 isRowMajor ? 1 : 0,
-                C_API_PREDICT_NORMAL,
+                predictionType.getType(),
                 0,
                 iterations,
                 "",
@@ -423,10 +425,11 @@ public class LGBMBooster implements AutoCloseable {
      * Make prediction for a new double[] row dataset. This method re-uses the internal predictor structure from previous calls
      * and is optimized for single row invocation.
      * @param data input vector
+     * @param predictionType the prediction type
      * @return score
      * @throws LGBMException
      */
-    public double predictForMatSingleRow(double[] data) throws LGBMException {
+    public double predictForMatSingleRow(double[] data, PredictionType predictionType) throws LGBMException {
         SWIGTYPE_p_double dataBuffer = new_doubleArray(data.length);
         for (int i = 0; i < data.length; i++) {
             doubleArray_setitem(dataBuffer, i, data[i]);
@@ -440,7 +443,7 @@ public class LGBMBooster implements AutoCloseable {
                 C_API_DTYPE_FLOAT64,
                 data.length,
                 1,
-                C_API_PREDICT_NORMAL,
+                predictionType.getType(),
                 0,
                 iterations,
                 "",
@@ -468,10 +471,11 @@ public class LGBMBooster implements AutoCloseable {
      * Make prediction for a new float[] row dataset. This method re-uses the internal predictor structure from previous calls
      * and is optimized for single row invocation.
      * @param data input vector
+     * @param predictionType the prediction type
      * @return score
      * @throws LGBMException
      */
-    public double predictForMatSingleRow(float[] data) throws LGBMException {
+    public double predictForMatSingleRow(float[] data, PredictionType predictionType) throws LGBMException {
         SWIGTYPE_p_float dataBuffer = new_floatArray(data.length);
         for (int i = 0; i < data.length; i++) {
             floatArray_setitem(dataBuffer, i, data[i]);
@@ -485,7 +489,7 @@ public class LGBMBooster implements AutoCloseable {
                 C_API_DTYPE_FLOAT32,
                 data.length,
                 1,
-                C_API_PREDICT_NORMAL,
+                predictionType.getType(),
                 0,
                 iterations,
                 "",
