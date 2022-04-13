@@ -22,7 +22,7 @@ public class MultithreadTest {
 
         @Override
         public Integer call() throws Exception {
-            LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "");
+            LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "", null);
             LGBMBooster.create(ds, "");
 
             return 0;

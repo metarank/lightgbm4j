@@ -29,7 +29,7 @@ public class LGBMBoosterTest {
     @Test
     public void testCreate() {
         Assertions.assertDoesNotThrow( () -> {
-            LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "");
+            LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "", null);
             LGBMBooster.create(ds, "");
         });
     }
@@ -37,7 +37,7 @@ public class LGBMBoosterTest {
     @Test
     public void testCreateFree() {
         Assertions.assertDoesNotThrow( () -> {
-            LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "");
+            LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "", null);
             LGBMBooster booster = LGBMBooster.create(ds, "");
             ds.close();
             booster.close();
@@ -46,7 +46,7 @@ public class LGBMBoosterTest {
 
     @Test
     public void testUpdateOneIter() throws LGBMException {
-        LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "");
+        LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "", null);
         LGBMBooster booster = LGBMBooster.create(ds, "");
         boolean finished = booster.updateOneIter();
         ds.close();
@@ -56,7 +56,7 @@ public class LGBMBoosterTest {
 
     @Test
     public void testSaveModelToString() throws LGBMException {
-        LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "");
+        LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "", null);
         LGBMBooster booster = LGBMBooster.create(ds, "");
         String model = booster.saveModelToString(0, 0, LGBMBooster.FeatureImportanceType.GAIN);
         ds.close();
@@ -66,7 +66,7 @@ public class LGBMBoosterTest {
 
     @Test
     public void testLoadSaveString() throws LGBMException {
-        LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "");
+        LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "", null);
         LGBMBooster booster = LGBMBooster.create(ds, "");
         String model = booster.saveModelToString(0, 0, LGBMBooster.FeatureImportanceType.GAIN);
         ds.close();
@@ -79,7 +79,7 @@ public class LGBMBoosterTest {
 
     @Test
     public void testGetFeatureNames() throws LGBMException {
-        LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "");
+        LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "", null);
         LGBMBooster booster = LGBMBooster.create(ds, "");
         String[] names = booster.getFeatureNames();
         assertTrue(names.length > 0, "feature names should be present");
@@ -89,7 +89,7 @@ public class LGBMBoosterTest {
 
     @Test
     public void testPredictForMatFloat() throws LGBMException {
-        LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "");
+        LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "", null);
         LGBMBooster booster = LGBMBooster.create(ds, "");
         boolean finished = booster.updateOneIter();
         double[] pred = booster.predictForMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, PredictionType.C_API_PREDICT_NORMAL);
@@ -100,7 +100,7 @@ public class LGBMBoosterTest {
 
     @Test
     public void testPredictForMatDouble() throws LGBMException {
-        LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "");
+        LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "", null);
         LGBMBooster booster = LGBMBooster.create(ds, "");
         boolean finished = booster.updateOneIter();
         double[] pred = booster.predictForMat(new double[] {1.0, 1.0, 1.0, 1.0}, 2, 2, true, PredictionType.C_API_PREDICT_NORMAL);
@@ -111,7 +111,7 @@ public class LGBMBoosterTest {
 
     @Test
     public void testAddValidData() throws LGBMException {
-        LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "");
+        LGBMDataset ds = LGBMDataset.createFromMat(new float[] {1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "", null);
         LGBMBooster booster = LGBMBooster.create(ds, "");
         booster.addValidData(ds);
         ds.close();
@@ -120,7 +120,7 @@ public class LGBMBoosterTest {
 
     @Test
     public void testGetEval() throws LGBMException {
-        LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification");
+        LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification", null);
         LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
         boolean finished = booster.updateOneIter();
         double[] eval = booster.getEval(0);
@@ -132,7 +132,7 @@ public class LGBMBoosterTest {
 
     @Test
     public void testGetEvalNames() throws LGBMException {
-        LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification");
+        LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification", null);
         LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
         booster.addValidData(dataset);
         String[] eval = booster.getEvalNames();
@@ -143,7 +143,7 @@ public class LGBMBoosterTest {
 
     @Test
     public void testFeatureImportance() throws LGBMException {
-        LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification");
+        LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification", null);
         LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
         booster.updateOneIter();
         booster.updateOneIter();
@@ -158,7 +158,7 @@ public class LGBMBoosterTest {
 
     @Test
     public void testPredictForMatSingleRow() throws LGBMException {
-        LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification");
+        LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification", null);
         LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
         booster.updateOneIter();
         booster.updateOneIter();
@@ -170,5 +170,20 @@ public class LGBMBoosterTest {
         dataset.close();
         booster.close();
     }
+
+    @Test void testCreateByReference() throws LGBMException {
+        LGBMDataset dataset1 = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification", null);
+        LGBMDataset dataset2 = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification", dataset1);
+        LGBMBooster booster = LGBMBooster.create(dataset1, "objective=binary label=name:Classification");
+        booster.updateOneIter();
+        booster.updateOneIter();
+        booster.updateOneIter();
+
+        booster.addValidData(dataset2);
+        double[] train  =booster.getEval(0);
+        double[] test = booster.getEval(1);
+        assertEquals(train[0], test[0], 0.001);
+    }
+
 
 }
