@@ -5,6 +5,7 @@ import com.microsoft.ml.lightgbm.*;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
 
 import static com.microsoft.ml.lightgbm.lightgbmlib.*;
 
@@ -46,15 +47,24 @@ public class LGBMBooster implements AutoCloseable {
                 loadNative("linux/x86_64/lib_lightgbm_swig.so", "lib_lightgbm_swig.so");
                 nativeLoaded = true;
             } else if (os.startsWith("Mac")) {
-                loadNative("osx/x86_64/lib_lightgbm.dylib", "lib_lightgbm.dylib");
-                loadNative("osx/x86_64/lib_lightgbm_swig.dylib", "lib_lightgbm_swig.dylib");
-                nativeLoaded = true;
+                String arch = System.getProperty("os.arch", "generic").toLowerCase(Locale.ENGLISH);
+                if (arch.startsWith("amd64") || arch.startsWith("x86_64")) {
+                    loadNative("osx/x86_64/lib_lightgbm.dylib", "lib_lightgbm.dylib");
+                    loadNative("osx/x86_64/lib_lightgbm_swig.dylib", "lib_lightgbm_swig.dylib");
+                    nativeLoaded = true;
+                } else if (arch.startsWith("aarch64") || arch.startsWith("arm64")) {
+                    loadNative("osx/aarch64/lib_lightgbm.dylib", "lib_lightgbm.dylib");
+                    loadNative("osx/aarch64/lib_lightgbm_swig.dylib", "lib_lightgbm_swig.dylib");
+                    nativeLoaded = true;
+                } else {
+                    System.out.println("arch " + arch + " is not supported");
+                }
             } else if (os.startsWith("Windows")) {
                 loadNative("windows/x86_64/lib_lightgbm.dll", "lib_lightgbm.dll");
                 loadNative("windows/x86_64/lib_lightgbm_swig.dll", "lib_lightgbm_swig.dll");
                 nativeLoaded = true;
             } else {
-                System.out.println("Only Linux/Windows/Mac on x86_64 are supported");
+                System.out.println("Only Linux@x86_64, Windows@x86_64, Mac@x86_64 and Mac@aarch are supported");
             }
         }
     }
