@@ -181,8 +181,9 @@ public class LGBMBooster implements AutoCloseable {
         for (int i = 0; i < input.length; i++) {
             floatArray_setitem(dataBuffer, i, input[i]);
         }
+        long nPreds = getNumPreds(0, -1, rows, predictionType.getType());
         SWIGTYPE_p_long_long outLength = new_int64_tp();
-        SWIGTYPE_p_double outBuffer = new_doubleArray(2L * rows);
+        SWIGTYPE_p_double outBuffer = new_doubleArray(nPreds);
         int result = LGBM_BoosterPredictForMat(
                 voidpp_value(handle),
                 float_to_voidp_ptr(dataBuffer),
@@ -229,8 +230,9 @@ public class LGBMBooster implements AutoCloseable {
         for (int i = 0; i < input.length; i++) {
             doubleArray_setitem(dataBuffer, i, input[i]);
         }
+        long nPreds = getNumPreds(0, -1, rows, predictionType.getType());
         SWIGTYPE_p_long_long outLength = new_int64_tp();
-        SWIGTYPE_p_double outBuffer = new_doubleArray(2L * rows);
+        SWIGTYPE_p_double outBuffer = new_doubleArray(nPreds);
         int result = LGBM_BoosterPredictForMat(
                 voidpp_value(handle),
                 double_to_voidp_ptr(dataBuffer),
@@ -535,5 +537,23 @@ public class LGBMBooster implements AutoCloseable {
                 break;
         }
         return importanceType;
+    }
+
+    private long getNumPreds(int startIteration, int numIteration, int nrow, int predictType) throws LGBMException {
+        SWIGTYPE_p_long_long nPredsPtr = new_int64_tp();
+        int result = LGBM_BoosterCalcNumPredict(
+                voidpp_value(handle),
+                nrow,
+                predictType,
+                startIteration,
+                numIteration,
+                nPredsPtr);
+        if (result < 0) {
+            delete_int64_tp(nPredsPtr);
+            throw new LGBMException(LGBM_GetLastError());
+        }
+        long nPreds = int64_tp_value(nPredsPtr);
+        delete_int64_tp(nPredsPtr);
+        return nPreds;
     }
 }
