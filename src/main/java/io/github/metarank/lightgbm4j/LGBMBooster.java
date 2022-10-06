@@ -3,8 +3,6 @@ package io.github.metarank.lightgbm4j;
 import com.microsoft.ml.lightgbm.*;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Locale;
 
 import static com.microsoft.ml.lightgbm.lightgbmlib.*;
@@ -18,6 +16,7 @@ public class LGBMBooster implements AutoCloseable {
 
 
     private static volatile boolean nativeLoaded = false;
+
     static {
         try {
             LGBMBooster.loadNative();
@@ -28,6 +27,7 @@ public class LGBMBooster implements AutoCloseable {
 
     /**
      * Called from tests.
+     *
      * @return true if JNI libraries were loaded successfully.
      */
     public static boolean isNativeLoaded() {
@@ -37,6 +37,7 @@ public class LGBMBooster implements AutoCloseable {
     /**
      * Loads all corresponsing native libraries for current platform. Called from the class initializer,
      * so usually there is no need to call it directly.
+     *
      * @throws IOException
      */
     public synchronized static void loadNative() throws IOException {
@@ -78,7 +79,7 @@ public class LGBMBooster implements AutoCloseable {
         } else {
             extractResource(path, name, libFile);
         }
-        System.out.println("Extracted file: exists=" + libFile.exists() + " path="+ libFile);
+        System.out.println("Extracted file: exists=" + libFile.exists() + " path=" + libFile);
         try {
             System.load(libFile.toString());
         } catch (UnsatisfiedLinkError err) {
@@ -108,6 +109,7 @@ public class LGBMBooster implements AutoCloseable {
 
     /**
      * Constructor is private because you need to have a JNI handle for native LightGBM instance.
+     *
      * @param iterations
      * @param handle
      */
@@ -118,6 +120,7 @@ public class LGBMBooster implements AutoCloseable {
 
     /**
      * Load an existing booster from model file.
+     *
      * @param file Filename of model
      * @return Booster instance.
      * @throws LGBMException
@@ -137,6 +140,7 @@ public class LGBMBooster implements AutoCloseable {
 
     /**
      * Load an existing booster from string.
+     *
      * @param model Model string
      * @return Booster instance.
      * @throws LGBMException
@@ -156,6 +160,7 @@ public class LGBMBooster implements AutoCloseable {
 
     /**
      * Deallocate all native memory for the LightGBM model.
+     *
      * @throws LGBMException
      */
     @Override
@@ -168,10 +173,11 @@ public class LGBMBooster implements AutoCloseable {
 
     /**
      * Make prediction for a new float[] dataset.
-     * @param input input matrix, as a 1D array. Size should be rows * cols.
-     * @param rows number of rows
-     * @param cols number of cols
-     * @param isRowMajor is the 1d encoding a row-major?
+     *
+     * @param input          input matrix, as a 1D array. Size should be rows * cols.
+     * @param rows           number of rows
+     * @param cols           number of cols
+     * @param isRowMajor     is the 1d encoding a row-major?
      * @param predictionType the prediction type
      * @return array of predictions
      * @throws LGBMException
@@ -182,7 +188,8 @@ public class LGBMBooster implements AutoCloseable {
             floatArray_setitem(dataBuffer, i, input[i]);
         }
         SWIGTYPE_p_long_long outLength = new_int64_tp();
-        SWIGTYPE_p_double outBuffer = new_doubleArray(2L * rows);
+        long outSize = outBufferSize(rows, cols, predictionType);
+        SWIGTYPE_p_double outBuffer = new_doubleArray(outSize);
         int result = LGBM_BoosterPredictForMat(
                 voidpp_value(handle),
                 float_to_voidp_ptr(dataBuffer),
@@ -203,7 +210,7 @@ public class LGBMBooster implements AutoCloseable {
             throw new LGBMException(LGBM_GetLastError());
         } else {
             long length = int64_tp_value(outLength);
-            double[] values = new double[(int)length];
+            double[] values = new double[(int) length];
             for (int i = 0; i < length; i++) {
                 values[i] = doubleArray_getitem(outBuffer, i);
             }
@@ -213,12 +220,14 @@ public class LGBMBooster implements AutoCloseable {
             return values;
         }
     }
+
     /**
      * Make prediction for a new double[] dataset.
-     * @param input input matrix, as a 1D array. Size should be rows * cols.
-     * @param rows number of rows
-     * @param cols number of cols
-     * @param isRowMajor is the 1 d encoding a row-major?
+     *
+     * @param input          input matrix, as a 1D array. Size should be rows * cols.
+     * @param rows           number of rows
+     * @param cols           number of cols
+     * @param isRowMajor     is the 1 d encoding a row-major?
      * @param predictionType the prediction type
      * @return array of predictions
      * @throws LGBMException
@@ -230,7 +239,8 @@ public class LGBMBooster implements AutoCloseable {
             doubleArray_setitem(dataBuffer, i, input[i]);
         }
         SWIGTYPE_p_long_long outLength = new_int64_tp();
-        SWIGTYPE_p_double outBuffer = new_doubleArray(2L * rows);
+        long outSize = outBufferSize(rows, cols, predictionType);
+        SWIGTYPE_p_double outBuffer = new_doubleArray(outSize);
         int result = LGBM_BoosterPredictForMat(
                 voidpp_value(handle),
                 double_to_voidp_ptr(dataBuffer),
@@ -251,7 +261,7 @@ public class LGBMBooster implements AutoCloseable {
             throw new LGBMException(LGBM_GetLastError());
         } else {
             long length = int64_tp_value(outLength);
-            double[] values = new double[(int)length];
+            double[] values = new double[(int) length];
             for (int i = 0; i < length; i++) {
                 values[i] = doubleArray_getitem(outBuffer, i);
             }
@@ -264,7 +274,8 @@ public class LGBMBooster implements AutoCloseable {
 
     /**
      * Create a new boosting learner.
-     * @param dataset a LGBMDataset with the training data.
+     *
+     * @param dataset    a LGBMDataset with the training data.
      * @param parameters Parameters in format ‘key1=value1 key2=value2’
      * @return
      * @throws LGBMException
@@ -281,6 +292,7 @@ public class LGBMBooster implements AutoCloseable {
 
     /**
      * Update the model for one iteration.
+     *
      * @return true if there are no more splits possible, so training is finished.
      * @throws LGBMException
      */
@@ -305,12 +317,13 @@ public class LGBMBooster implements AutoCloseable {
 
     /**
      * Save model to string.
-     * @param startIteration Start index of the iteration that should be saved
-     * @param numIteration Index of the iteration that should be saved, 0 and negative means save all
+     *
+     * @param startIteration    Start index of the iteration that should be saved
+     * @param numIteration      Index of the iteration that should be saved, 0 and negative means save all
      * @param featureImportance Type of feature importance, can be FeatureImportanceType.SPLIT or FeatureImportanceType.GAIN
      * @return
      */
-    public String saveModelToString(int startIteration, int numIteration, FeatureImportanceType featureImportance)  {
+    public String saveModelToString(int startIteration, int numIteration, FeatureImportanceType featureImportance) {
         SWIGTYPE_p_long_long outLength = new_int64_tp();
         String result = LGBM_BoosterSaveModelToStringSWIG(
                 voidpp_value(handle),
@@ -326,6 +339,7 @@ public class LGBMBooster implements AutoCloseable {
 
     /**
      * Get names of features.
+     *
      * @return a list of feature names.
      */
     public String[] getFeatureNames() {
@@ -337,6 +351,7 @@ public class LGBMBooster implements AutoCloseable {
 
     /**
      * Add new validation data to booster.
+     *
      * @param dataset dataset to validate
      * @throws LGBMException
      */
@@ -349,6 +364,7 @@ public class LGBMBooster implements AutoCloseable {
 
     /**
      * Get evaluation for training data and validation data.
+     *
      * @param dataIndex Index of data, 0: training data, 1: 1st validation data, 2: 2nd validation data and so on
      * @return
      * @throws LGBMException
@@ -363,7 +379,7 @@ public class LGBMBooster implements AutoCloseable {
             throw new LGBMException(LGBM_GetLastError());
         } else {
             double[] evals = new double[intp_value(outLength)];
-            for (int i=0; i < evals.length; i++) {
+            for (int i = 0; i < evals.length; i++) {
                 evals[i] = doubleArray_getitem(outBuffer, i);
             }
             delete_intp(outLength);
@@ -374,6 +390,7 @@ public class LGBMBooster implements AutoCloseable {
 
     /**
      * Get names of evaluation datasets.
+     *
      * @return array of eval dataset names.
      * @throws LGBMException
      */
@@ -386,7 +403,8 @@ public class LGBMBooster implements AutoCloseable {
 
     /**
      * Get model feature importance.
-     * @param numIteration Number of iterations for which feature importance is calculated, 0 or less means use all
+     *
+     * @param numIteration   Number of iterations for which feature importance is calculated, 0 or less means use all
      * @param importanceType GAIN or SPLIT
      * @return Result array with feature importance
      * @throws LGBMException
@@ -405,7 +423,7 @@ public class LGBMBooster implements AutoCloseable {
             throw new LGBMException(LGBM_GetLastError());
         } else {
             double[] importance = new double[numFeatures];
-            for (int i=0; i < numFeatures; i++) {
+            for (int i = 0; i < numFeatures; i++) {
                 importance[i] = doubleArray_getitem(outBuffer, i);
             }
             delete_doubleArray(outBuffer);
@@ -415,6 +433,7 @@ public class LGBMBooster implements AutoCloseable {
 
     /**
      * Get number of features.
+     *
      * @return number of features
      * @throws LGBMException
      */
@@ -434,7 +453,8 @@ public class LGBMBooster implements AutoCloseable {
     /**
      * Make prediction for a new double[] row dataset. This method re-uses the internal predictor structure from previous calls
      * and is optimized for single row invocation.
-     * @param data input vector
+     *
+     * @param data           input vector
      * @param predictionType the prediction type
      * @return score
      * @throws LGBMException
@@ -445,7 +465,8 @@ public class LGBMBooster implements AutoCloseable {
             doubleArray_setitem(dataBuffer, i, data[i]);
         }
         SWIGTYPE_p_long_long outLength = new_int64_tp();
-        SWIGTYPE_p_double outBuffer = new_doubleArray(1);
+        long outBufferSize = outBufferSize(1, data.length, predictionType);
+        SWIGTYPE_p_double outBuffer = new_doubleArray(outBufferSize);
 
         int result = LGBM_BoosterPredictForMatSingleRow(
                 voidpp_value(handle),
@@ -459,7 +480,7 @@ public class LGBMBooster implements AutoCloseable {
                 "",
                 outLength,
                 outBuffer
-                );
+        );
         if (result < 0) {
             delete_doubleArray(dataBuffer);
             delete_doubleArray(outBuffer);
@@ -467,7 +488,7 @@ public class LGBMBooster implements AutoCloseable {
             throw new LGBMException(LGBM_GetLastError());
         } else {
             long length = int64_tp_value(outLength);
-            double[] values = new double[(int)length];
+            double[] values = new double[(int) length];
             for (int i = 0; i < length; i++) {
                 values[i] = doubleArray_getitem(outBuffer, i);
             }
@@ -477,10 +498,12 @@ public class LGBMBooster implements AutoCloseable {
             return values[0];
         }
     }
+
     /**
      * Make prediction for a new float[] row dataset. This method re-uses the internal predictor structure from previous calls
      * and is optimized for single row invocation.
-     * @param data input vector
+     *
+     * @param data           input vector
      * @param predictionType the prediction type
      * @return score
      * @throws LGBMException
@@ -491,7 +514,8 @@ public class LGBMBooster implements AutoCloseable {
             floatArray_setitem(dataBuffer, i, data[i]);
         }
         SWIGTYPE_p_long_long outLength = new_int64_tp();
-        SWIGTYPE_p_double outBuffer = new_doubleArray(1);
+        long outBufferSize = outBufferSize(1, data.length, predictionType);
+        SWIGTYPE_p_double outBuffer = new_doubleArray(outBufferSize);
 
         int result = LGBM_BoosterPredictForMatSingleRow(
                 voidpp_value(handle),
@@ -513,7 +537,7 @@ public class LGBMBooster implements AutoCloseable {
             throw new LGBMException(LGBM_GetLastError());
         } else {
             long length = int64_tp_value(outLength);
-            double[] values = new double[(int)length];
+            double[] values = new double[(int) length];
             for (int i = 0; i < length; i++) {
                 values[i] = doubleArray_getitem(outBuffer, i);
             }
@@ -535,5 +559,26 @@ public class LGBMBooster implements AutoCloseable {
                 break;
         }
         return importanceType;
+    }
+
+    /**
+     * Calculates the output buffer size for the different prediction types. See the notes at:
+     * <a href="https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictForMat">predictForMat</a> &
+     * <a href="https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictForMatSingleRow">predictForMatSingleRow</a>
+     * for more info.
+     *
+     * @param rows           the number of rows in the input data
+     * @param cols           the number of columns in the input data
+     * @param predictionType the type of prediction we are trying to achieve
+     * @return number of elements in the output result (size)
+     */
+    private long outBufferSize(int rows, int cols, PredictionType predictionType) {
+        long defaultSize = 2L * rows;
+        if (PredictionType.C_API_PREDICT_CONTRIB.equals(predictionType))
+            return defaultSize * (cols + 1);
+        else if (PredictionType.C_API_PREDICT_LEAF_INDEX.equals(predictionType))
+            return defaultSize * iterations;
+        else // for C_API_PREDICT_NORMAL & C_API_PREDICT_RAW_SCORE
+            return defaultSize;
     }
 }

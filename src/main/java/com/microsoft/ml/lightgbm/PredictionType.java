@@ -23,6 +23,10 @@ public enum PredictionType {
         return description;
     }
 
+    public boolean equals(PredictionType that) {
+        return this.type == that.type;
+    }
+
     @Override
     public String toString() {
         return "PredictionType{" +
