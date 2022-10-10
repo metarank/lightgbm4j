@@ -41,7 +41,7 @@ To install, use the following maven coordinates:
 <dependency>
   <groupId>io.github.metarank</groupId>
   <artifactId>lightgbm4j</artifactId>
-  <version>3.3.1-2</version>
+  <version>3.3.2-2</version>
 </dependency>
 ```
 
@@ -140,7 +140,7 @@ test.close();
 
 ## Supported platforms
 
-This code is tested to work well with Linux (Ubuntu 20.04), Windows (Server 2019) and MacOS 10.15/11. 
+This code is tested to work well with Linux (Ubuntu 20.04), Windows (Server 2019) and MacOS 10.15/11. Mac M1 is also supported.
 Supported Java versions are 8, 11 and 17.
 
 ## LightGBM API Coverage
