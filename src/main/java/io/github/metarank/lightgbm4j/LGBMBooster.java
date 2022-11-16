@@ -43,12 +43,18 @@ public class LGBMBooster implements AutoCloseable {
     public synchronized static void loadNative() throws IOException {
         if (!nativeLoaded) {
             String os = System.getProperty("os.name");
+            String arch = System.getProperty("os.arch", "generic").toLowerCase(Locale.ENGLISH);
             if (os.startsWith("Linux") || os.startsWith("LINUX")) {
-                loadNative("linux/x86_64/lib_lightgbm.so", "lib_lightgbm.so");
-                loadNative("linux/x86_64/lib_lightgbm_swig.so", "lib_lightgbm_swig.so");
-                nativeLoaded = true;
+                if (arch.startsWith("amd64") || arch.startsWith("x86_64")) {
+                    loadNative("linux/x86_64/lib_lightgbm.so", "lib_lightgbm.so");
+                    loadNative("linux/x86_64/lib_lightgbm_swig.so", "lib_lightgbm_swig.so");
+                    nativeLoaded = true;
+                } else if (arch.startsWith("aarch64") || arch.startsWith("arm64")) {
+                    loadNative("linux/aarch64/lib_lightgbm.so", "lib_lightgbm.so");
+                    loadNative("linux/aarch64/lib_lightgbm_swig.so", "lib_lightgbm_swig.so");
+                    nativeLoaded = true;
+                }
             } else if (os.startsWith("Mac")) {
-                String arch = System.getProperty("os.arch", "generic").toLowerCase(Locale.ENGLISH);
                 if (arch.startsWith("amd64") || arch.startsWith("x86_64")) {
                     loadNative("osx/x86_64/lib_lightgbm.dylib", "lib_lightgbm.dylib");
                     loadNative("osx/x86_64/lib_lightgbm_swig.dylib", "lib_lightgbm_swig.dylib");
