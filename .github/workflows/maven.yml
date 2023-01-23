@@ -15,11 +15,11 @@ jobs:
     strategy:
       matrix:
         java: [17]
-        platform: [ubuntu-20.04, macos-10, windows-2019]
+        platform: [ubuntu-20.04, macos-11, windows-2019]
     steps:
-#    - name: install libomp
-#      run: brew install libomp
-#      if: runner.os == 'macOS'
+    - name: install libomp
+      run: brew remove libomp
+      if: runner.os == 'macOS'
     - uses: actions/checkout@v2
       with:
         lfs: true
