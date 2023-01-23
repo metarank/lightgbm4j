@@ -57,28 +57,25 @@ public class LGBMBooster implements AutoCloseable {
                     nativeLoaded = true;
                 }
             } else if (os.startsWith("Mac")) {
-                if (arch.startsWith("amd64") || arch.startsWith("x86_64")) {
-                    loadNative("osx/x86_64/lib_lightgbm.dylib", "lib_lightgbm.dylib");
-                    loadNative("osx/x86_64/lib_lightgbm_swig.dylib", "lib_lightgbm_swig.dylib");
-                    nativeLoaded = true;
-                } else if (arch.startsWith("aarch64") || arch.startsWith("arm64")) {
-                    try {
+                try {
+                    if (arch.startsWith("amd64") || arch.startsWith("x86_64")) {
+                        loadNative("osx/x86_64/lib_lightgbm.dylib", "lib_lightgbm.dylib");
+                        loadNative("osx/x86_64/lib_lightgbm_swig.dylib", "lib_lightgbm_swig.dylib");
+                        nativeLoaded = true;
+                    } else if (arch.startsWith("aarch64") || arch.startsWith("arm64")) {
                         loadNative("osx/aarch64/lib_lightgbm.dylib", "lib_lightgbm.dylib");
                         loadNative("osx/aarch64/lib_lightgbm_swig.dylib", "lib_lightgbm_swig.dylib");
-                    } catch (UnsatisfiedLinkError err) {
-                        System.out.println("\n\n\n");
-                        System.out.println("****************************************************");
-                        System.out.println("Your MacOS system probably has no 'libomp' library installed!");
-                        System.out.println("Please double-check the lightgbm4j install instructions:");
-                        System.out.println("- https://github.com/metarank/lightgbm4j/");
-                        System.out.println("- or just do 'brew install libomp'");
-                        System.out.println("****************************************************");
-                        System.out.println("\n\n\n");
-                        throw err;
+                        nativeLoaded = true;
+                    } else {
+                        System.out.println("arch " + arch + " is not supported");
+                        throw new UnsatisfiedLinkError("no native lightgbm library found for your OS "+os);
                     }
-                    nativeLoaded = true;
-                } else {
-                    System.out.println("arch " + arch + " is not supported");
+                } catch (UnsatisfiedLinkError err) {
+                    String message = err.getMessage();
+                    if (message.contains("libomp.dylib")) {
+                        printMacosLibompError();
+                    }
+                    throw err;
                 }
             } else if (os.startsWith("Windows")) {
                 loadNative("windows/x86_64/lib_lightgbm.dll", "lib_lightgbm.dll");
@@ -88,6 +85,16 @@ public class LGBMBooster implements AutoCloseable {
                 System.out.println("Only Linux@x86_64, Windows@x86_64, Mac@x86_64 and Mac@aarch are supported");
             }
         }
+    }
+    private static void printMacosLibompError() {
+        System.out.println("\n\n\n");
+        System.out.println("****************************************************");
+        System.out.println("Your MacOS system probably has no 'libomp' library installed!");
+        System.out.println("Please double-check the lightgbm4j install instructions:");
+        System.out.println("- https://github.com/metarank/lightgbm4j/");
+        System.out.println("- or just do 'brew install libomp'");
+        System.out.println("****************************************************");
+        System.out.println("\n\n\n");
     }
 
     private static void loadNative(String path, String name) throws IOException, UnsatisfiedLinkError {
