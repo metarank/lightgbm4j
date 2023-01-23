@@ -50,7 +50,7 @@ changes released on top.
 
 ### MacOS & Linux native library dependencies installation 
 
-LightGBM native library requires the `libomp` dependency for OpenMP support, but this library is often not missing on some systems by default.
+LightGBM native library requires the `libomp` dependency for OpenMP support, but this library is often missing on some systems by default.
 
 For MacOS:
 ```
