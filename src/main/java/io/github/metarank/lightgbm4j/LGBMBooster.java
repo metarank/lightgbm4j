@@ -47,26 +47,57 @@ public class LGBMBooster implements AutoCloseable {
             String os = System.getProperty("os.name");
             String arch = System.getProperty("os.arch", "generic").toLowerCase(Locale.ENGLISH);
             if (os.startsWith("Linux") || os.startsWith("LINUX")) {
-                if (arch.startsWith("amd64") || arch.startsWith("x86_64")) {
-                    loadNative("linux/x86_64/lib_lightgbm.so", "lib_lightgbm.so");
-                    loadNative("linux/x86_64/lib_lightgbm_swig.so", "lib_lightgbm_swig.so");
-                    nativeLoaded = true;
-                } else if (arch.startsWith("aarch64") || arch.startsWith("arm64")) {
-                    loadNative("linux/aarch64/lib_lightgbm.so", "lib_lightgbm.so");
-                    loadNative("linux/aarch64/lib_lightgbm_swig.so", "lib_lightgbm_swig.so");
-                    nativeLoaded = true;
+                try {
+                    if (arch.startsWith("amd64") || arch.startsWith("x86_64")) {
+                        loadNative("linux/x86_64/lib_lightgbm.so", "lib_lightgbm.so");
+                        loadNative("linux/x86_64/lib_lightgbm_swig.so", "lib_lightgbm_swig.so");
+                        nativeLoaded = true;
+                    } else if (arch.startsWith("aarch64") || arch.startsWith("arm64")) {
+                        loadNative("linux/aarch64/lib_lightgbm.so", "lib_lightgbm.so");
+                        loadNative("linux/aarch64/lib_lightgbm_swig.so", "lib_lightgbm_swig.so");
+                        nativeLoaded = true;
+                    }
+                } catch (UnsatisfiedLinkError err) {
+                    String message = err.getMessage();
+                    if (message.contains("libgomp")) {
+                        System.out.println("\n\n\n");
+                        System.out.println("****************************************************");
+                        System.out.println("Your Linux system probably has no 'libgomp' library installed!");
+                        System.out.println("Please double-check the lightgbm4j install instructions:");
+                        System.out.println("- https://github.com/metarank/lightgbm4j/");
+                        System.out.println("- or just install the libgomp with your package manager");
+                        System.out.println("****************************************************");
+                        System.out.println("\n\n\n");
+                    }
                 }
             } else if (os.startsWith("Mac")) {
-                if (arch.startsWith("amd64") || arch.startsWith("x86_64")) {
-                    loadNative("osx/x86_64/lib_lightgbm.dylib", "lib_lightgbm.dylib");
-                    loadNative("osx/x86_64/lib_lightgbm_swig.dylib", "lib_lightgbm_swig.dylib");
-                    nativeLoaded = true;
-                } else if (arch.startsWith("aarch64") || arch.startsWith("arm64")) {
-                    loadNative("osx/aarch64/lib_lightgbm.dylib", "lib_lightgbm.dylib");
-                    loadNative("osx/aarch64/lib_lightgbm_swig.dylib", "lib_lightgbm_swig.dylib");
-                    nativeLoaded = true;
-                } else {
-                    System.out.println("arch " + arch + " is not supported");
+                try {
+                    if (arch.startsWith("amd64") || arch.startsWith("x86_64")) {
+                        loadNative("osx/x86_64/lib_lightgbm.dylib", "lib_lightgbm.dylib");
+                        loadNative("osx/x86_64/lib_lightgbm_swig.dylib", "lib_lightgbm_swig.dylib");
+                        nativeLoaded = true;
+                    } else if (arch.startsWith("aarch64") || arch.startsWith("arm64")) {
+                        loadNative("osx/aarch64/lib_lightgbm.dylib", "lib_lightgbm.dylib");
+                        loadNative("osx/aarch64/lib_lightgbm_swig.dylib", "lib_lightgbm_swig.dylib");
+                        nativeLoaded = true;
+                    } else {
+                        System.out.println("arch " + arch + " is not supported");
+                        throw new UnsatisfiedLinkError("no native lightgbm library found for your OS "+os);
+                    }
+                } catch (UnsatisfiedLinkError err) {
+                    String message = err.getMessage();
+                    if (message.contains("libomp.dylib")) {
+                        System.out.println("\n\n\n");
+                        System.out.println("****************************************************");
+                        System.out.println("Your MacOS system probably has no 'libomp' library installed!");
+                        System.out.println("Please double-check the lightgbm4j install instructions:");
+                        System.out.println("- https://github.com/metarank/lightgbm4j/");
+                        System.out.println("- or just do 'brew install libomp'");
+                        System.out.println("****************************************************");
+                        System.out.println("\n\n\n");
+
+                    }
+                    throw err;
                 }
             } else if (os.startsWith("Windows")) {
                 loadNative("windows/x86_64/lib_lightgbm.dll", "lib_lightgbm.dll");
@@ -78,7 +109,7 @@ public class LGBMBooster implements AutoCloseable {
         }
     }
 
-    private static void loadNative(String path, String name) throws IOException {
+    private static void loadNative(String path, String name) throws IOException, UnsatisfiedLinkError {
         System.out.println("Loading native lib " + path);
         String tmp = System.getProperty("java.io.tmpdir");
         File libFile = new File(tmp + File.separator + name);
@@ -91,7 +122,8 @@ public class LGBMBooster implements AutoCloseable {
         try {
             System.load(libFile.toString());
         } catch (UnsatisfiedLinkError err) {
-            System.out.println("Cannot load library: " + err + " cause: " + err.getMessage());
+            System.out.println("Cannot load library:" + err.getMessage());
+            throw err;
         }
     }
 
