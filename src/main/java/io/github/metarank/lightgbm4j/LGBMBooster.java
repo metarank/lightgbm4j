@@ -47,14 +47,28 @@ public class LGBMBooster implements AutoCloseable {
             String os = System.getProperty("os.name");
             String arch = System.getProperty("os.arch", "generic").toLowerCase(Locale.ENGLISH);
             if (os.startsWith("Linux") || os.startsWith("LINUX")) {
-                if (arch.startsWith("amd64") || arch.startsWith("x86_64")) {
-                    loadNative("linux/x86_64/lib_lightgbm.so", "lib_lightgbm.so");
-                    loadNative("linux/x86_64/lib_lightgbm_swig.so", "lib_lightgbm_swig.so");
-                    nativeLoaded = true;
-                } else if (arch.startsWith("aarch64") || arch.startsWith("arm64")) {
-                    loadNative("linux/aarch64/lib_lightgbm.so", "lib_lightgbm.so");
-                    loadNative("linux/aarch64/lib_lightgbm_swig.so", "lib_lightgbm_swig.so");
-                    nativeLoaded = true;
+                try {
+                    if (arch.startsWith("amd64") || arch.startsWith("x86_64")) {
+                        loadNative("linux/x86_64/lib_lightgbm.so", "lib_lightgbm.so");
+                        loadNative("linux/x86_64/lib_lightgbm_swig.so", "lib_lightgbm_swig.so");
+                        nativeLoaded = true;
+                    } else if (arch.startsWith("aarch64") || arch.startsWith("arm64")) {
+                        loadNative("linux/aarch64/lib_lightgbm.so", "lib_lightgbm.so");
+                        loadNative("linux/aarch64/lib_lightgbm_swig.so", "lib_lightgbm_swig.so");
+                        nativeLoaded = true;
+                    }
+                } catch (UnsatisfiedLinkError err) {
+                    String message = err.getMessage();
+                    if (message.contains("libgomp")) {
+                        System.out.println("\n\n\n");
+                        System.out.println("****************************************************");
+                        System.out.println("Your Linux system probably has no 'libgomp' library installed!");
+                        System.out.println("Please double-check the lightgbm4j install instructions:");
+                        System.out.println("- https://github.com/metarank/lightgbm4j/");
+                        System.out.println("- or just install the libgomp with your package manager");
+                        System.out.println("****************************************************");
+                        System.out.println("\n\n\n");
+                    }
                 }
             } else if (os.startsWith("Mac")) {
                 try {
@@ -73,7 +87,15 @@ public class LGBMBooster implements AutoCloseable {
                 } catch (UnsatisfiedLinkError err) {
                     String message = err.getMessage();
                     if (message.contains("libomp.dylib")) {
-                        printMacosLibompError();
+                        System.out.println("\n\n\n");
+                        System.out.println("****************************************************");
+                        System.out.println("Your MacOS system probably has no 'libomp' library installed!");
+                        System.out.println("Please double-check the lightgbm4j install instructions:");
+                        System.out.println("- https://github.com/metarank/lightgbm4j/");
+                        System.out.println("- or just do 'brew install libomp'");
+                        System.out.println("****************************************************");
+                        System.out.println("\n\n\n");
+
                     }
                     throw err;
                 }
@@ -85,16 +107,6 @@ public class LGBMBooster implements AutoCloseable {
                 System.out.println("Only Linux@x86_64, Windows@x86_64, Mac@x86_64 and Mac@aarch are supported");
             }
         }
-    }
-    private static void printMacosLibompError() {
-        System.out.println("\n\n\n");
-        System.out.println("****************************************************");
-        System.out.println("Your MacOS system probably has no 'libomp' library installed!");
-        System.out.println("Please double-check the lightgbm4j install instructions:");
-        System.out.println("- https://github.com/metarank/lightgbm4j/");
-        System.out.println("- or just do 'brew install libomp'");
-        System.out.println("****************************************************");
-        System.out.println("\n\n\n");
     }
 
     private static void loadNative(String path, String name) throws IOException, UnsatisfiedLinkError {
