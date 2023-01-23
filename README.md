@@ -48,6 +48,14 @@ To install, use the following maven coordinates:
 Versioning schema attempts to match the upstream, but with extra `-N` suffix, if there were a couple of extra lightgbm4j-specific
 changes released on top.
 
+### MacOS installation 
+
+LightGBM native library requires the `libomp` dependency for OpenMP support, but this library is often not installed on MacOS out of the box. To install it, run the following command:
+
+```
+brew install libomp
+```
+
 ## Usage
 
 There are two main classes available: 

@@ -14,11 +14,11 @@ jobs:
     runs-on: ${{ matrix.platform }}
     strategy:
       matrix:
-        java: [17]
+        java: [11, 17]
         platform: [ubuntu-20.04, macos-11, windows-2019]
     steps:
     - name: install libomp
-      run: brew remove --ignore-dependencies libomp
+      run: brew install libomp
       if: runner.os == 'macOS'
     - uses: actions/checkout@v2
       with:
