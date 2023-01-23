@@ -238,6 +238,83 @@ public class LGBMDataset implements AutoCloseable {
     }
 
     /**
+     * Get float[] field from the dataset.
+     * @param field Field name
+     * @return
+     * @throws LGBMException
+     */
+    public float[] getFieldFloat(String field) throws LGBMException {
+        SWIGTYPE_p_int lenPtr = new_intp();
+        SWIGTYPE_p_p_void bufferPtr = new_voidpp();
+        SWIGTYPE_p_int typePtr = new_intp();
+        int result = LGBM_DatasetGetField(handle, field, lenPtr, bufferPtr, typePtr);
+        if (result < 0) {
+            delete_intp(lenPtr);
+            delete_voidpp(bufferPtr);
+            delete_intp(typePtr);
+            throw new LGBMException(LGBM_GetLastError());
+        } else {
+            int len = intp_value(lenPtr);
+            int type = intp_value(typePtr);
+            if (type == C_API_DTYPE_FLOAT32) {
+                SWIGTYPE_p_void buf = voidpp_value(bufferPtr);
+                float[] out = new float[len];
+                for (int i=0; i<len; i++) {
+                    // Hello, this is Johny Knoxville, and today we're reading a raw void pointer as an array of floats
+                    out[i] = lightgbmlibJNI.floatArray_getitem(SWIGTYPE_p_void.getCPtr(buf), i);
+                }
+                delete_intp(lenPtr);
+                delete_voidpp(bufferPtr);
+                delete_intp(typePtr);
+                return out;
+            } else {
+                delete_intp(lenPtr);
+                delete_voidpp(bufferPtr);
+                delete_intp(typePtr);
+                throw new LGBMException("getFieldFloat expects a float field (of ctype=" + C_API_DTYPE_FLOAT32 + ") but got ctype="+type);
+            }
+        }
+    }
+    /**
+     * Get int[] field from the dataset.
+     * @param field Field name
+     * @return
+     * @throws LGBMException
+     */
+    public int[] getFieldInt(String field) throws LGBMException {
+        // a copy-paste from getFieldFloat with different types, for the sake of performance
+        SWIGTYPE_p_int lenPtr = new_intp();
+        SWIGTYPE_p_p_void bufferPtr = new_voidpp();
+        SWIGTYPE_p_int typePtr = new_intp();
+        int result = LGBM_DatasetGetField(handle, field, lenPtr, bufferPtr, typePtr);
+        if (result < 0) {
+            delete_intp(lenPtr);
+            delete_voidpp(bufferPtr);
+            delete_intp(typePtr);
+            throw new LGBMException(LGBM_GetLastError());
+        } else {
+            int len = intp_value(lenPtr);
+            int type = intp_value(typePtr);
+            if (type == C_API_DTYPE_INT32) {
+                SWIGTYPE_p_void buf = voidpp_value(bufferPtr);
+                int[] out = new int[len];
+                for (int i=0; i<len; i++) {
+                    out[i] = lightgbmlibJNI.intArray_getitem(SWIGTYPE_p_void.getCPtr(buf), i);
+                }
+                delete_intp(lenPtr);
+                delete_voidpp(bufferPtr);
+                delete_intp(typePtr);
+                return out;
+            } else {
+                delete_intp(lenPtr);
+                delete_voidpp(bufferPtr);
+                delete_intp(typePtr);
+                throw new LGBMException("getFieldFloat expects a float field (of ctype=" + C_API_DTYPE_FLOAT32 + ") but got ctype="+type);
+            }
+        }
+    }
+
+    /**
      * Deallocate all native memory for the LightGBM dataset.
      * @throws LGBMException
      */
@@ -251,4 +328,5 @@ public class LGBMDataset implements AutoCloseable {
             }
         }
     }
+
 }

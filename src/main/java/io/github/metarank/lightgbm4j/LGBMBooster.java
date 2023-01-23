@@ -591,14 +591,32 @@ public class LGBMBooster implements AutoCloseable {
     }
 
     /**
+     * Get number of predictions for training data and validation data (this can be used to support customized evaluation functions).
+     * @param dataIdx  Index of data, 0: training data, 1: 1st validation data, 2: 2nd validation data and so on
+     * @return Number of predictions
+     * @throws LGBMException
+     */
+    public long getNumPredict(int dataIdx) throws LGBMException {
+        SWIGTYPE_p_long_long numHandle = new_int64_tp();
+        int result = LGBM_BoosterGetNumPredict(voidpp_value(handle), dataIdx, numHandle);
+        if (result < 0) {
+            delete_int64_tp(numHandle);
+            throw new LGBMException(LGBM_GetLastError());
+        } else {
+            long numClasses = int64_tp_value(numHandle);
+            delete_int64_tp(numHandle);
+            return numClasses;
+        }
+    }
+
+    /**
      * Get prediction for training data and validation data.
      * @param dataIdx Index of data, 0: training data, 1: 1st validation data, 2: 2nd validation data and so on
-     * @param dataset reference to target dataset
      * @return array with predictions, of size num_class * dataset.num_data
      * @throws LGBMException
      */
-    public double[] getPredict(int dataIdx, LGBMDataset dataset) throws LGBMException {
-        int allocatedSize = getNumClasses() * dataset.getNumData();
+    public double[] getPredict(int dataIdx) throws LGBMException {
+        int allocatedSize = getNumClasses() * (int)getNumPredict(dataIdx);
         SWIGTYPE_p_double buffer = new_doubleArray(allocatedSize);
         SWIGTYPE_p_long_long size = new_int64_tp();
         int result = LGBM_BoosterGetPredict(voidpp_value(handle), dataIdx, size, buffer);
@@ -673,4 +691,5 @@ public class LGBMBooster implements AutoCloseable {
         else // for C_API_PREDICT_NORMAL & C_API_PREDICT_RAW_SCORE
             return defaultSize;
     }
+
 }

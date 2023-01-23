@@ -19,7 +19,7 @@ public class SWIGTYPE_p_void {
     swigCPtr = 0;
   }
 
-  protected static long getCPtr(SWIGTYPE_p_void obj) {
+  public static long getCPtr(SWIGTYPE_p_void obj) {
     return (obj == null) ? 0 : obj.swigCPtr;
   }
 }
