@@ -42,7 +42,7 @@ public class CancerIntegrationTest {
                 Arguments.of(datasetReadmeExample())
         );
     }
-    private static LGBMDataset datasetFromFile() throws LGBMException, IOException {
+    public static LGBMDataset datasetFromFile() throws LGBMException, IOException {
         LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification", null);
         return dataset;
     }

@@ -4,6 +4,8 @@ import com.microsoft.ml.lightgbm.PredictionType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Random;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class LGBMBoosterTest {
@@ -293,6 +295,47 @@ public class LGBMBoosterTest {
         assertEquals(train[0], test[0], 0.001);
     }
 
+    @Test void testGetNumClasses() throws LGBMException {
+        LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification", null);
+        LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
+        assertEquals(booster.getNumClasses(), 1);
+        dataset.close();
+        booster.close();
+    }
+
+    @Test void testGetNumPredict() throws LGBMException {
+        LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification", null);
+        LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
+        assertEquals(booster.getNumPredict(0), 116);
+        dataset.close();
+        booster.close();
+    }
+
+    @Test void testGetPredict() throws LGBMException {
+        LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification", null);
+        LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
+        booster.updateOneIter();
+        booster.updateOneIter();
+        booster.updateOneIter();
+        double[] preds = booster.getPredict(0);
+        assertEquals(preds.length, 116);
+        dataset.close();
+        booster.close();
+    }
+
+    @Test void testUpdateOneIterCustom() throws LGBMException {
+        LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification", null);
+        LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
+        int size = dataset.getNumData();
+        booster.updateOneIterCustom(randomArray(size), randomArray(size));
+        booster.updateOneIterCustom(randomArray(size), randomArray(size));
+        booster.updateOneIterCustom(randomArray(size), randomArray(size));
+        double[] preds = booster.getPredict(0);
+        assertEquals(preds.length, 116);
+        dataset.close();
+        booster.close();
+    }
+
     @Test void testDoubleClose() throws LGBMException {
         LGBMDataset ds = LGBMDataset.createFromMat(new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "", null);
         LGBMBooster booster = LGBMBooster.create(ds, "");
@@ -300,5 +343,13 @@ public class LGBMBoosterTest {
         booster.close();
     }
 
+    private float[] randomArray(int size) {
+        float[] result = new float[size];
+        Random rnd = new Random();
+        for (int i=0; i<size; i++) {
+            result[i] = rnd.nextFloat();
+        }
+        return result;
+    }
 
 }

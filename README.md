@@ -138,6 +138,38 @@ train.close();
 test.close();
 ```
 
+## Custom objectives
+
+LightGBM4j supports using custom objective functions, but it doesn't provide any high-level wrappers as python API does. 
+
+LightGBM needs a tuple of 1st and 2nd order derivatives (gradients and hessians) computed for each datapoint. With LightGBM4j it looks like this for an MSE metric:
+
+```java
+LGBMDataset dataset = LGBMDataset.createFromFile("cancer.csv", "header=true label=name:Classification", null);
+LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
+// actual ground truth label values
+float y[] = dataset.getFieldFloat("label");
+
+for (int it=0; it<10; it++) {
+    // predictions for current iteration
+    double[] yhat = booster.getPredict(0); // 0 - training dataset
+    float[] grad = new float[y.length];
+    float[] hess = new float[y.length];
+    for (int i=0; i<y.length; i++) {
+        // 1-st derivative of squared error
+        grad[i] = (float)(2 * (yhat[i]-y[i]));
+        // 2-nd derivative of squared error
+        hess[i] = (float)(0 * (yhat[i]-y[i]) + 2);
+    }
+    booster.updateOneIterCustom(grad, hess);
+    // print the computed average error
+    double[] err = booster.getEval(0);
+    System.out.println("it " + it + " err=" + err[0]);
+}
+booster.close();
+dataset.close();
+```
+
 ## Supported platforms
 
 This code is tested to work well with Linux (Ubuntu 20.04), Windows (Server 2019) and MacOS 10.15/11. Mac M1 is also supported.
@@ -157,12 +189,16 @@ Supported methods:
 * [LGBM_BoosterFeatureImportance](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterFeatureImportance)
 * [LGBM_BoosterGetEvalNames](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetEvalNames)
 * [LGBM_BoosterGetNumFeature](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetNumFeature)
+* [LGBM_BoosterGetNumClasses](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetNumClasses)
+* [LGBM_BoosterGetNumPredict](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetNumPredict)
+* [LGBM_BoosterGetPredict](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetPredict)
 * [LGBM_BoosterLoadModelFromString](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterLoadModelFromString)
 * [LGBM_BoosterPredictForMat](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictForMat)
 * [LGBM_BoosterPredictForMatSingleRow](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictForMatSingleRow)
 * [LGBM_BoosterSaveModel](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterSaveModel)
 * [LGBM_BoosterSaveModelToString](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterSaveModelToString)
 * [LGBM_BoosterUpdateOneIter](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterUpdateOneIter)
+* [LGBM_BoosterUpdateOneIterCustom](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterUpdateOneIterCustom)
 * [LGBM_DatasetCreateFromFile](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetCreateFromFile)
 * [LGBM_DatasetCreateFromMat](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetCreateFromMat)
 * [LGBM_DatasetFree](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetFree)
@@ -182,9 +218,6 @@ Not yet supported:
 * [LGBM_BoosterGetEvalCounts](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetEvalCounts)
 * [LGBM_BoosterGetLeafValue](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetLeafValue)
 * [LGBM_BoosterGetLowerBoundValue](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetLowerBoundValue)
-* [LGBM_BoosterGetNumClasses](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetNumClasses)
-* [LGBM_BoosterGetNumPredict](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetNumPredict) 
-* [LGBM_BoosterGetPredict](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetPredict)
 * [LGBM_BoosterGetUpperBoundValue](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterGetUpperBoundValue)
 * [LGBM_BoosterMerge](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterMerge)
 * [LGBM_BoosterNumberOfTotalModel](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterNumberOfTotalModel)
@@ -205,7 +238,6 @@ Not yet supported:
 * [LGBM_BoosterRollbackOneIter](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterRollbackOneIter)
 * [LGBM_BoosterSetLeafValue](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterSetLeafValue)
 * [LGBM_BoosterShuffleModels](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterShuffleModels)
-* [LGBM_BoosterUpdateOneIterCustom](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterUpdateOneIterCustom)
 * [LGBM_DatasetAddFeaturesFrom](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetAddFeaturesFrom)
 * [LGBM_DatasetCreateByReference](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetCreateByReference)
 * [LGBM_DatasetCreateFromCSC](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetCreateFromCSC)
