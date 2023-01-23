@@ -18,7 +18,7 @@ jobs:
         platform: [ubuntu-20.04, macos-11, windows-2019]
     steps:
     - name: install libomp
-      run: brew remove libomp
+      run: brew remove --ignore-dependencies libomp
       if: runner.os == 'macOS'
     - uses: actions/checkout@v2
       with:
