@@ -573,6 +573,87 @@ public class LGBMBooster implements AutoCloseable {
     }
 
     /**
+     * Get number of classes.
+     * @return Number of classes
+     * @throws LGBMException
+     */
+    public int getNumClasses() throws LGBMException {
+        SWIGTYPE_p_int numHandle = new_int32_tp();
+        int result = LGBM_BoosterGetNumClasses(voidpp_value(handle), numHandle);
+        if (result < 0) {
+            delete_intp(numHandle);
+            throw new LGBMException(LGBM_GetLastError());
+        } else {
+            int numClasses = intp_value(numHandle);
+            delete_intp(numHandle);
+            return numClasses;
+        }
+    }
+
+    /**
+     * Get prediction for training data and validation data.
+     * @param dataIdx Index of data, 0: training data, 1: 1st validation data, 2: 2nd validation data and so on
+     * @param dataset reference to target dataset
+     * @return array with predictions, of size num_class * dataset.num_data
+     * @throws LGBMException
+     */
+    public double[] getPredict(int dataIdx, LGBMDataset dataset) throws LGBMException {
+        int allocatedSize = getNumClasses() * dataset.getNumData();
+        SWIGTYPE_p_double buffer = new_doubleArray(allocatedSize);
+        SWIGTYPE_p_long_long size = new_int64_tp();
+        int result = LGBM_BoosterGetPredict(voidpp_value(handle), dataIdx, size, buffer);
+        if (result < 0) {
+            delete_doubleArray(buffer);
+            delete_int64_tp(size);
+            throw new LGBMException(LGBM_GetLastError());
+        } else {
+            double[] out = new double[(int)int64_tp_value(size)];
+            for (int i=0; i<out.length; i++) {
+                out[i] = doubleArray_getitem(buffer, i);
+            }
+            delete_doubleArray(buffer);
+            delete_int64_tp(size);
+            return out;
+        }
+    }
+
+    /**
+     * Update the model by specifying gradient and Hessian directly (this can be used to support customized loss functions).
+     * The length of the arrays referenced by grad and hess must be equal to num_class * num_train_data, this is not
+     * verified by the library, the caller must ensure this.
+     *
+     * @param grad The first order derivative (gradient) statistics
+     * @param hess The second order derivative (Hessian) statistics
+     * @return true means the update was successfully finished (cannot split anymore), false indicates failure
+     * @throws LGBMException
+     */
+    public boolean updateOneIterCustom(float[] grad, float[] hess) throws LGBMException {
+        SWIGTYPE_p_float gradHandle = new_floatArray(grad.length);
+        for (int i=0; i<grad.length; i++) {
+            floatArray_setitem(gradHandle, i, grad[i]);
+        }
+        SWIGTYPE_p_float hessHandle = new_floatArray(hess.length);
+        for (int i=0; i<hess.length; i++) {
+            floatArray_setitem(hessHandle, i, hess[i]);
+        }
+        SWIGTYPE_p_int isFinishedHandle = new_intp();
+        int result = LGBM_BoosterUpdateOneIterCustom(voidpp_value(handle), gradHandle, hessHandle, isFinishedHandle);
+        if (result < 0) {
+            delete_floatArray(gradHandle);
+            delete_floatArray(hessHandle);
+            delete_intp(isFinishedHandle);
+            throw new LGBMException(LGBM_GetLastError());
+        } else {
+            int isFinished = intp_value(isFinishedHandle);
+            delete_floatArray(gradHandle);
+            delete_floatArray(hessHandle);
+            delete_intp(isFinishedHandle);
+            return isFinished == 1;
+        }
+    }
+
+
+    /**
      * Calculates the output buffer size for the different prediction types. See the notes at:
      * <a href="https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictForMat">predictForMat</a> &
      * <a href="https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictForMatSingleRow">predictForMatSingleRow</a>
