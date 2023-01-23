@@ -62,8 +62,23 @@ public class LGBMBooster implements AutoCloseable {
                     loadNative("osx/x86_64/lib_lightgbm_swig.dylib", "lib_lightgbm_swig.dylib");
                     nativeLoaded = true;
                 } else if (arch.startsWith("aarch64") || arch.startsWith("arm64")) {
-                    loadNative("osx/aarch64/lib_lightgbm.dylib", "lib_lightgbm.dylib");
-                    loadNative("osx/aarch64/lib_lightgbm_swig.dylib", "lib_lightgbm_swig.dylib");
+                    try {
+                        loadNative("osx/aarch64/lib_lightgbm.dylib", "lib_lightgbm.dylib");
+                        loadNative("osx/aarch64/lib_lightgbm_swig.dylib", "lib_lightgbm_swig.dylib");
+                    } catch (UnsatisfiedLinkError err) {
+                        String message = err.getMessage();
+                        if (message.contains("libomp.dylib")) {
+                            System.out.println("\n\n\n");
+                            System.out.println("****************************************************");
+                            System.out.println("Your MacOS system has no 'libomp' library installed!");
+                            System.out.println("Please double-check the lightgbm4j install instructions:");
+                            System.out.println("- https://github.com/metarank/lightgbm4j/");
+                            System.out.println("- or just do 'brew install libomp'");
+                            System.out.println("****************************************************");
+                            System.out.println("\n\n\n");
+                        }
+                        throw err;
+                    }
                     nativeLoaded = true;
                 } else {
                     System.out.println("arch " + arch + " is not supported");
@@ -92,6 +107,7 @@ public class LGBMBooster implements AutoCloseable {
             System.load(libFile.toString());
         } catch (UnsatisfiedLinkError err) {
             System.out.println("Cannot load library: " + err + " cause: " + err.getMessage());
+            throw err;
         }
     }
 
