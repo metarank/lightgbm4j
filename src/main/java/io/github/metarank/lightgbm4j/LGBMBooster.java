@@ -17,6 +17,8 @@ public class LGBMBooster implements AutoCloseable {
 
     private static volatile boolean nativeLoaded = false;
 
+    private volatile boolean isClosed = false;
+
     static {
         try {
             LGBMBooster.loadNative();
@@ -171,9 +173,12 @@ public class LGBMBooster implements AutoCloseable {
      */
     @Override
     public void close() throws LGBMException {
-        int result = LGBM_BoosterFree(voidpp_value(handle));
-        if (result < 0) {
-            throw new LGBMException(LGBM_GetLastError());
+        if (!isClosed) {
+            isClosed = true;
+            int result = LGBM_BoosterFree(voidpp_value(handle));
+            if (result < 0) {
+                throw new LGBMException(LGBM_GetLastError());
+            }
         }
     }
 

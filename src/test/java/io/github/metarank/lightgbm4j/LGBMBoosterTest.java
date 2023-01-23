@@ -293,5 +293,12 @@ public class LGBMBoosterTest {
         assertEquals(train[0], test[0], 0.001);
     }
 
+    @Test void testDoubleClose() throws LGBMException {
+        LGBMDataset ds = LGBMDataset.createFromMat(new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "", null);
+        LGBMBooster booster = LGBMBooster.create(ds, "");
+        booster.close();
+        booster.close();
+    }
+
 
 }

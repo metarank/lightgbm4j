@@ -7,6 +7,7 @@ import java.io.IOException;
 import static com.microsoft.ml.lightgbm.lightgbmlib.*;
 
 public class LGBMDataset implements AutoCloseable {
+    private volatile boolean isClosed = false;
     public SWIGTYPE_p_void handle;
     static {
         try {
@@ -242,9 +243,12 @@ public class LGBMDataset implements AutoCloseable {
      */
     @Override
     public void close() throws LGBMException {
-        int result = LGBM_DatasetFree(handle);
-        if (result < 0) {
-            throw new LGBMException(LGBM_GetLastError());
+        if (!isClosed) {
+            int result = LGBM_DatasetFree(handle);
+            isClosed = true;
+            if (result < 0) {
+                throw new LGBMException(LGBM_GetLastError());
+            }
         }
     }
 }
