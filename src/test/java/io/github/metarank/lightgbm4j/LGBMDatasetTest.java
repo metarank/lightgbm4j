@@ -64,4 +64,9 @@ public class LGBMDatasetTest {
         ds.close();
     }
 
+    @Test void testDoubleClose() throws LGBMException {
+        LGBMDataset ds = LGBMDataset.createFromMat(new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "", null);
+        ds.close();
+        ds.close();
+    }
 }
