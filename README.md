@@ -62,6 +62,18 @@ For Debian Linux:
 apt install libgomp1
 ```
 
+### GPU support
+
+It is possible to force GPU support for a training:
+* rebuild the [LightGBM with GPU support]: use `-DUSE_CUDA=1 -DUSE_SWIG=ON` CMake options. You should also match the native/JNI versions precisely.
+* LightGBM4j loads native libraries by default from bundled resources. This can be overridden by setting the `LIGHTGBM_NATIVE_LIB_PATH` environment variable. It should point to a directory with `lib_lightgbm.so` and `lib_lightgbm_swig.so` files (or with `dll`/`dylib` extensions on Windows/MacOS).
+
+If the native override was able to successfully load a custom library you've built, then you'll see the following line in logs:
+```
+LIGHTGBM_NATIVE_LIB_PATH is set: loading /home/user/code/LightGBM/lib_lightgbm.so
+LIGHTGBM_NATIVE_LIB_PATH is set: loading /home/user/code/LightGBM/lib_lightgbm_swig.so
+```
+
 ## Usage
 
 There are two main classes available: 
