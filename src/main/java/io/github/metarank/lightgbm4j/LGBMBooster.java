@@ -237,10 +237,11 @@ public class LGBMBooster implements AutoCloseable {
      * @param cols           number of cols
      * @param isRowMajor     is the 1d encoding a row-major?
      * @param predictionType the prediction type
+     * @param parameter      prediction options
      * @return array of predictions
      * @throws LGBMException
      */
-    public double[] predictForMat(float[] input, int rows, int cols, boolean isRowMajor, PredictionType predictionType) throws LGBMException {
+    public double[] predictForMat(float[] input, int rows, int cols, boolean isRowMajor, PredictionType predictionType, String parameter) throws LGBMException {
         SWIGTYPE_p_float dataBuffer = new_floatArray(input.length);
         for (int i = 0; i < input.length; i++) {
             floatArray_setitem(dataBuffer, i, input[i]);
@@ -258,7 +259,7 @@ public class LGBMBooster implements AutoCloseable {
                 predictionType.getType(),
                 0,
                 iterations,
-                "",
+                parameter,
                 outLength,
                 outBuffer);
         if (result < 0) {
@@ -279,6 +280,10 @@ public class LGBMBooster implements AutoCloseable {
         }
     }
 
+    public double[] predictForMat(float[] input, int rows, int cols, boolean isRowMajor, PredictionType predictionType) throws LGBMException {
+        return predictForMat(input, rows, cols, isRowMajor, predictionType, "");
+    }
+
     /**
      * Make prediction for a new double[] dataset.
      *
@@ -287,11 +292,12 @@ public class LGBMBooster implements AutoCloseable {
      * @param cols           number of cols
      * @param isRowMajor     is the 1 d encoding a row-major?
      * @param predictionType the prediction type
+     * @param parameter      prediction options
      * @return array of predictions
      * @throws LGBMException
      */
 
-    public double[] predictForMat(double[] input, int rows, int cols, boolean isRowMajor, PredictionType predictionType) throws LGBMException {
+    public double[] predictForMat(double[] input, int rows, int cols, boolean isRowMajor, PredictionType predictionType, String parameter) throws LGBMException {
         SWIGTYPE_p_double dataBuffer = new_doubleArray(input.length);
         for (int i = 0; i < input.length; i++) {
             doubleArray_setitem(dataBuffer, i, input[i]);
@@ -309,7 +315,7 @@ public class LGBMBooster implements AutoCloseable {
                 predictionType.getType(),
                 0,
                 iterations,
-                "",
+                parameter,
                 outLength,
                 outBuffer);
         if (result < 0) {
@@ -328,6 +334,9 @@ public class LGBMBooster implements AutoCloseable {
             delete_doubleArray(outBuffer);
             return values;
         }
+    }
+    public double[] predictForMat(double[] input, int rows, int cols, boolean isRowMajor, PredictionType predictionType) throws LGBMException {
+        return predictForMat(input, rows, cols, isRowMajor, predictionType, "");
     }
 
     /**
