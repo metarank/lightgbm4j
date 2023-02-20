@@ -1,6 +1,8 @@
 package io.github.metarank.lightgbm4j;
 
 import com.microsoft.ml.lightgbm.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -8,12 +10,15 @@ import static com.microsoft.ml.lightgbm.lightgbmlib.*;
 
 public class LGBMDataset implements AutoCloseable {
     private volatile boolean isClosed = false;
+
+    private static final Logger logger = LoggerFactory.getLogger(LGBMDataset.class);
+
     public SWIGTYPE_p_void handle;
     static {
         try {
             LGBMBooster.loadNative();
         } catch (IOException e) {
-            System.out.println("Cannot load native library for your platform");
+            logger.error("Cannot load native library for your platform", e);
         }
     }
 

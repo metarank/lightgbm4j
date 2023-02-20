@@ -1,6 +1,8 @@
 package io.github.metarank.lightgbm4j;
 
 import com.microsoft.ml.lightgbm.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.Locale;
@@ -14,7 +16,7 @@ public class LGBMBooster implements AutoCloseable {
     private static final long MODEL_SAVE_BUFFER_SIZE = 10 * 1024 * 1024L;
     private static final long EVAL_RESULTS_BUFFER_SIZE = 1024;
 
-
+    private static final Logger logger = LoggerFactory.getLogger(LGBMBooster.class);
     private static volatile boolean nativeLoaded = false;
 
     private volatile boolean isClosed = false;
@@ -23,7 +25,7 @@ public class LGBMBooster implements AutoCloseable {
         try {
             LGBMBooster.loadNative();
         } catch (IOException e) {
-            System.out.println("Cannot load native library for your platform");
+            logger.info("Cannot load native library for your platform");
         }
     }
 
@@ -60,14 +62,14 @@ public class LGBMBooster implements AutoCloseable {
                 } catch (UnsatisfiedLinkError err) {
                     String message = err.getMessage();
                     if (message.contains("libgomp")) {
-                        System.out.println("\n\n\n");
-                        System.out.println("****************************************************");
-                        System.out.println("Your Linux system probably has no 'libgomp' library installed!");
-                        System.out.println("Please double-check the lightgbm4j install instructions:");
-                        System.out.println("- https://github.com/metarank/lightgbm4j/");
-                        System.out.println("- or just install the libgomp with your package manager");
-                        System.out.println("****************************************************");
-                        System.out.println("\n\n\n");
+                        logger.warn("\n\n\n");
+                        logger.warn("****************************************************");
+                        logger.warn("Your Linux system probably has no 'libgomp' library installed!");
+                        logger.warn("Please double-check the lightgbm4j install instructions:");
+                        logger.warn("- https://github.com/metarank/lightgbm4j/");
+                        logger.warn("- or just install the libgomp with your package manager");
+                        logger.warn("****************************************************");
+                        logger.warn("\n\n\n");
                     }
                 }
             } else if (os.startsWith("Mac")) {
@@ -81,20 +83,20 @@ public class LGBMBooster implements AutoCloseable {
                         loadNative("osx/aarch64/", "lib_lightgbm_swig.dylib");
                         nativeLoaded = true;
                     } else {
-                        System.out.println("arch " + arch + " is not supported");
+                        logger.warn("arch " + arch + " is not supported");
                         throw new UnsatisfiedLinkError("no native lightgbm library found for your OS "+os);
                     }
                 } catch (UnsatisfiedLinkError err) {
                     String message = err.getMessage();
                     if (message.contains("libomp.dylib")) {
-                        System.out.println("\n\n\n");
-                        System.out.println("****************************************************");
-                        System.out.println("Your MacOS system probably has no 'libomp' library installed!");
-                        System.out.println("Please double-check the lightgbm4j install instructions:");
-                        System.out.println("- https://github.com/metarank/lightgbm4j/");
-                        System.out.println("- or just do 'brew install libomp'");
-                        System.out.println("****************************************************");
-                        System.out.println("\n\n\n");
+                        logger.warn("\n\n\n");
+                        logger.warn("****************************************************");
+                        logger.warn("Your MacOS system probably has no 'libomp' library installed!");
+                        logger.warn("Please double-check the lightgbm4j install instructions:");
+                        logger.warn("- https://github.com/metarank/lightgbm4j/");
+                        logger.warn("- or just do 'brew install libomp'");
+                        logger.warn("****************************************************");
+                        logger.warn("\n\n\n");
 
                     }
                     throw err;
@@ -104,7 +106,7 @@ public class LGBMBooster implements AutoCloseable {
                 loadNative("windows/x86_64/", "lib_lightgbm_swig.dll");
                 nativeLoaded = true;
             } else {
-                System.out.println("Only Linux@x86_64, Windows@x86_64, Mac@x86_64 and Mac@aarch are supported");
+                logger.error("Only Linux@x86_64, Windows@x86_64, Mac@x86_64 and Mac@aarch are supported");
             }
         }
     }
@@ -116,34 +118,34 @@ public class LGBMBooster implements AutoCloseable {
                 nativePathOverride = nativePathOverride + "/";
             }
             String libFile = nativePathOverride + name;
-            System.out.println("LIGHTGBM_NATIVE_LIB_PATH is set: loading " + libFile);
+            logger.info("LIGHTGBM_NATIVE_LIB_PATH is set: loading " + libFile);
             try {
                 System.load(libFile);
             } catch (UnsatisfiedLinkError err) {
-                System.out.println("Cannot load library:" + err.getMessage());
+                logger.error("Cannot load library:" + err.getMessage(), err);
                 throw err;
             }
         } else {
-            System.out.println("Loading native lib from resource " + path + "/" + name);
+            logger.info("Loading native lib from resource " + path + "/" + name);
             String tmp = System.getProperty("java.io.tmpdir");
             File libFile = new File(tmp + File.separator + name);
             if (libFile.exists()) {
-                System.out.println(libFile + " already exists");
+                logger.info(libFile + " already exists");
             } else {
                 extractResource(path + name, name, libFile);
             }
-            System.out.println("Extracted file: exists=" + libFile.exists() + " path=" + libFile);
+            logger.info("Extracted file: exists=" + libFile.exists() + " path=" + libFile);
             try {
                 System.load(libFile.toString());
             } catch (UnsatisfiedLinkError err) {
-                System.out.println("Cannot load library:" + err.getMessage());
+                logger.error("Cannot load library:" + err.getMessage(), err);
                 throw err;
             }
         }
     }
 
     private static void extractResource(String path, String name, File dest) throws IOException {
-        System.out.println("Extracting native lib " + dest);
+        logger.info("Extracting native lib " + dest);
         InputStream libStream = LGBMBooster.class.getClassLoader().getResourceAsStream(path);
         OutputStream fileStream = new FileOutputStream(dest);
         copyStream(libStream, fileStream);
@@ -159,7 +161,7 @@ public class LGBMBooster implements AutoCloseable {
             target.write(buf, 0, length);
             bytesCopied += length;
         }
-        System.out.println("Copied " + bytesCopied + " bytes");
+        logger.info("Copied " + bytesCopied + " bytes");
     }
 
     /**
