@@ -49,12 +49,12 @@ public class LGBMBooster implements AutoCloseable {
             if (os.startsWith("Linux") || os.startsWith("LINUX")) {
                 try {
                     if (arch.startsWith("amd64") || arch.startsWith("x86_64")) {
-                        loadNative("linux/x86_64/lib_lightgbm.so", "lib_lightgbm.so");
-                        loadNative("linux/x86_64/lib_lightgbm_swig.so", "lib_lightgbm_swig.so");
+                        loadNative("linux/x86_64/", "lib_lightgbm.so");
+                        loadNative("linux/x86_64/", "lib_lightgbm_swig.so");
                         nativeLoaded = true;
                     } else if (arch.startsWith("aarch64") || arch.startsWith("arm64")) {
-                        loadNative("linux/aarch64/lib_lightgbm.so", "lib_lightgbm.so");
-                        loadNative("linux/aarch64/lib_lightgbm_swig.so", "lib_lightgbm_swig.so");
+                        loadNative("linux/aarch64/", "lib_lightgbm.so");
+                        loadNative("linux/aarch64/", "lib_lightgbm_swig.so");
                         nativeLoaded = true;
                     }
                 } catch (UnsatisfiedLinkError err) {
@@ -73,12 +73,12 @@ public class LGBMBooster implements AutoCloseable {
             } else if (os.startsWith("Mac")) {
                 try {
                     if (arch.startsWith("amd64") || arch.startsWith("x86_64")) {
-                        loadNative("osx/x86_64/lib_lightgbm.dylib", "lib_lightgbm.dylib");
-                        loadNative("osx/x86_64/lib_lightgbm_swig.dylib", "lib_lightgbm_swig.dylib");
+                        loadNative("osx/x86_64/", "lib_lightgbm.dylib");
+                        loadNative("osx/x86_64/", "lib_lightgbm_swig.dylib");
                         nativeLoaded = true;
                     } else if (arch.startsWith("aarch64") || arch.startsWith("arm64")) {
-                        loadNative("osx/aarch64/lib_lightgbm.dylib", "lib_lightgbm.dylib");
-                        loadNative("osx/aarch64/lib_lightgbm_swig.dylib", "lib_lightgbm_swig.dylib");
+                        loadNative("osx/aarch64/", "lib_lightgbm.dylib");
+                        loadNative("osx/aarch64/", "lib_lightgbm_swig.dylib");
                         nativeLoaded = true;
                     } else {
                         System.out.println("arch " + arch + " is not supported");
@@ -100,8 +100,8 @@ public class LGBMBooster implements AutoCloseable {
                     throw err;
                 }
             } else if (os.startsWith("Windows")) {
-                loadNative("windows/x86_64/lib_lightgbm.dll", "lib_lightgbm.dll");
-                loadNative("windows/x86_64/lib_lightgbm_swig.dll", "lib_lightgbm_swig.dll");
+                loadNative("windows/x86_64/", "lib_lightgbm.dll");
+                loadNative("windows/x86_64/", "lib_lightgbm_swig.dll");
                 nativeLoaded = true;
             } else {
                 System.out.println("Only Linux@x86_64, Windows@x86_64, Mac@x86_64 and Mac@aarch are supported");
@@ -110,20 +110,35 @@ public class LGBMBooster implements AutoCloseable {
     }
 
     private static void loadNative(String path, String name) throws IOException, UnsatisfiedLinkError {
-        System.out.println("Loading native lib " + path);
-        String tmp = System.getProperty("java.io.tmpdir");
-        File libFile = new File(tmp + File.separator + name);
-        if (libFile.exists()) {
-            System.out.println(libFile + " already exists");
+        String nativePathOverride = System.getenv("LIGHTGBM_NATIVE_LIB_PATH");
+        if (nativePathOverride != null) {
+            if (!nativePathOverride.endsWith("/")) {
+                nativePathOverride = nativePathOverride + "/";
+            }
+            String libFile = nativePathOverride + name;
+            System.out.println("LIGHTGBM_NATIVE_LIB_PATH is set: loading " + libFile);
+            try {
+                System.load(libFile);
+            } catch (UnsatisfiedLinkError err) {
+                System.out.println("Cannot load library:" + err.getMessage());
+                throw err;
+            }
         } else {
-            extractResource(path, name, libFile);
-        }
-        System.out.println("Extracted file: exists=" + libFile.exists() + " path=" + libFile);
-        try {
-            System.load(libFile.toString());
-        } catch (UnsatisfiedLinkError err) {
-            System.out.println("Cannot load library:" + err.getMessage());
-            throw err;
+            System.out.println("Loading native lib from resource " + path + "/" + name);
+            String tmp = System.getProperty("java.io.tmpdir");
+            File libFile = new File(tmp + File.separator + name);
+            if (libFile.exists()) {
+                System.out.println(libFile + " already exists");
+            } else {
+                extractResource(path + name, name, libFile);
+            }
+            System.out.println("Extracted file: exists=" + libFile.exists() + " path=" + libFile);
+            try {
+                System.load(libFile.toString());
+            } catch (UnsatisfiedLinkError err) {
+                System.out.println("Cannot load library:" + err.getMessage());
+                throw err;
+            }
         }
     }
 
