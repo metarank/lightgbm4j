@@ -41,7 +41,7 @@ To install, use the following maven coordinates:
 <dependency>
   <groupId>io.github.metarank</groupId>
   <artifactId>lightgbm4j</artifactId>
-  <version>3.3.2-5</version>
+  <version>4.1.0-1</version>
 </dependency>
 ```
 
@@ -198,12 +198,12 @@ dataset.close();
 
 Note the following change in the LightGBM4 behavior:
 
-* you need to set `objective=none metric=<eval metric>` parameters to signal that we're going to use custom objective.
+* you need to set `objective=none metric=<eval metric>` parameters to signal that we're going to use custom objective. Otherwise the LightGBM will complain on incorrect objective.
 
 ## Supported platforms
 
 This code is tested to work well with Linux (Ubuntu 20.04), Windows (Server 2019) and MacOS 10.15/11. Mac M1 is also supported.
-Supported Java versions are 8, 11 and 17.
+Supported Java versions are 11, 17 and 21.
 
 ## LightGBM API Coverage
 
