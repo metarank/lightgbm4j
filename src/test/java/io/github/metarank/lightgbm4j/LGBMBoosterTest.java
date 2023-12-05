@@ -325,7 +325,7 @@ public class LGBMBoosterTest {
 
     @Test void testUpdateOneIterCustom() throws LGBMException {
         LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification", null);
-        LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
+        LGBMBooster booster = LGBMBooster.create(dataset, "objective=none metric=rmse label=name:Classification");
         int size = dataset.getNumData();
         booster.updateOneIterCustom(randomArray(size), randomArray(size));
         booster.updateOneIterCustom(randomArray(size), randomArray(size));

@@ -9,7 +9,7 @@ public class CustomObjectiveTest {
     @Test
     void testCancerCustomObjective() throws LGBMException, IOException {
         LGBMDataset dataset = CancerIntegrationTest.datasetFromFile();
-        LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
+        LGBMBooster booster = LGBMBooster.create(dataset, "objective=none metric=rmse label=name:Classification");
         // actual ground truth label values
         float y[] = dataset.getFieldFloat("label");
         for (int it=0; it<10; it++) {
