@@ -5,6 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
 
 import static com.microsoft.ml.lightgbm.lightgbmlib.*;
@@ -51,12 +54,12 @@ public class LGBMBooster implements AutoCloseable {
             if (os.startsWith("Linux") || os.startsWith("LINUX")) {
                 try {
                     if (arch.startsWith("amd64") || arch.startsWith("x86_64")) {
-                        loadNative("linux/x86_64/", "lib_lightgbm.so");
-                        loadNative("linux/x86_64/", "lib_lightgbm_swig.so");
+                        loadNative("lightgbm4j/linux/x86_64/", "lib_lightgbm.so");
+                        loadNative("lightgbm4j/linux/x86_64/", "lib_lightgbm_swig.so");
                         nativeLoaded = true;
                     } else if (arch.startsWith("aarch64") || arch.startsWith("arm64")) {
-                        loadNative("linux/aarch64/", "lib_lightgbm.so");
-                        loadNative("linux/aarch64/", "lib_lightgbm_swig.so");
+                        loadNative("lightgbm4j/linux/aarch64/", "lib_lightgbm.so");
+                        loadNative("lightgbm4j/linux/aarch64/", "lib_lightgbm_swig.so");
                         nativeLoaded = true;
                     }
                 } catch (UnsatisfiedLinkError err) {
@@ -75,12 +78,12 @@ public class LGBMBooster implements AutoCloseable {
             } else if (os.startsWith("Mac")) {
                 try {
                     if (arch.startsWith("amd64") || arch.startsWith("x86_64")) {
-                        loadNative("osx/x86_64/", "lib_lightgbm.dylib");
-                        loadNative("osx/x86_64/", "lib_lightgbm_swig.dylib");
+                        loadNative("lightgbm4j/osx/x86_64/", "lib_lightgbm.dylib");
+                        loadNative("lightgbm4j/osx/x86_64/", "lib_lightgbm_swig.dylib");
                         nativeLoaded = true;
                     } else if (arch.startsWith("aarch64") || arch.startsWith("arm64")) {
-                        loadNative("osx/aarch64/", "lib_lightgbm.dylib");
-                        loadNative("osx/aarch64/", "lib_lightgbm_swig.dylib");
+                        loadNative("lightgbm4j/osx/aarch64/", "lib_lightgbm.dylib");
+                        loadNative("lightgbm4j/osx/aarch64/", "lib_lightgbm_swig.dylib");
                         nativeLoaded = true;
                     } else {
                         logger.warn("arch " + arch + " is not supported");
@@ -102,8 +105,8 @@ public class LGBMBooster implements AutoCloseable {
                     throw err;
                 }
             } else if (os.startsWith("Windows")) {
-                loadNative("windows/x86_64/", "lib_lightgbm.dll");
-                loadNative("windows/x86_64/", "lib_lightgbm_swig.dll");
+                loadNative("lightgbm4j/windows/x86_64/", "lib_lightgbm.dll");
+                loadNative("lightgbm4j/windows/x86_64/", "lib_lightgbm_swig.dll");
                 nativeLoaded = true;
             } else {
                 logger.error("Only Linux@x86_64, Windows@x86_64, Mac@x86_64 and Mac@aarch are supported");
@@ -147,10 +150,37 @@ public class LGBMBooster implements AutoCloseable {
     private static void extractResource(String path, String name, File dest) throws IOException {
         logger.info("Extracting native lib " + dest);
         InputStream libStream = LGBMBooster.class.getClassLoader().getResourceAsStream(path);
-        OutputStream fileStream = new FileOutputStream(dest);
-        copyStream(libStream, fileStream);
+        ByteArrayOutputStream libByteStream = new ByteArrayOutputStream();
+        copyStream(libStream, libByteStream);
         libStream.close();
-        fileStream.close();
+
+        InputStream md5Stream = LGBMBooster.class.getClassLoader().getResourceAsStream(path + ".md5");
+        ByteArrayOutputStream md5ByteStream = new ByteArrayOutputStream();
+        copyStream(md5Stream, md5ByteStream);
+        md5Stream.close();
+        String expectedDigest = md5ByteStream.toString();
+        try {
+            byte[] digest = MessageDigest.getInstance("MD5").digest(libByteStream.toByteArray());
+            String checksum = new BigInteger(1, digest).toString(16);
+            if (!checksum.equals(expectedDigest)) {
+                logger.warn("\n\n\n");
+                logger.warn("****************************************************");
+                logger.warn("Hash mismatch between expected and real LightGBM native library in classpath!");
+                logger.warn("Your JVM classpath has "+name+" with md5="+checksum+" and we expect "+expectedDigest);
+                logger.warn("This usually means that you have another LightGBM wrapper in classpath");
+                logger.warn("- MMLSpark/SynapseML is the main suspect");
+                logger.warn("****************************************************");
+                logger.warn("\n\n\n");
+                throw new IOException("hash mismatch");
+            }
+            ByteArrayInputStream source = new ByteArrayInputStream(libByteStream.toByteArray());
+            OutputStream fileStream = new FileOutputStream(dest);
+            copyStream(source, fileStream);
+            source.close();
+            fileStream.close();
+        } catch (NoSuchAlgorithmException ex) {
+            throw new IOException("md5 algorithm not supported, cannot check digest");
+        }
     }
 
     private static void copyStream(InputStream source, OutputStream target) throws IOException {
