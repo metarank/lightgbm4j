@@ -14,8 +14,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class RankingIntegrationTest {
     @Test
     public void testLetor() throws LGBMException, IOException {
-        LGBMDataset train = datasetFromResource("/mq2008/train.txt.gz", null);
-        LGBMDataset test = datasetFromResource("/mq2008/test.txt.gz", train);
+        LGBMDataset train = datasetFromResource("/mq2008/train.txt.gz", null, false);
+        LGBMDataset test = datasetFromResource("/mq2008/test.txt.gz", train, false);
+        trainBooster(train, test);
+        train.close();
+        test.close();
+    }
+
+    @Test
+    public void testLetorPosition() throws LGBMException, IOException {
+        LGBMDataset train = datasetFromResource("/mq2008/train.txt.gz", null, true);
+        LGBMDataset test = datasetFromResource("/mq2008/test.txt.gz", train, true);
+        trainBooster(train, test);
+        train.close();
+        test.close();
+    }
+
+    public void trainBooster(LGBMDataset train, LGBMDataset test) throws LGBMException, IOException  {
         LGBMBooster booster = LGBMBooster.create(train, "objective=lambdarank metric=ndcg lambdarank_truncation_level=10 max_depth=5 learning_rate=0.1 num_leaves=8");
         booster.addValidData(test);
         for (int i=0; i<100; i++) {
@@ -30,12 +45,10 @@ public class RankingIntegrationTest {
         assertTrue(names.length > 0);
         assertTrue(weights.length > 0);
         booster.close();
-        train.close();
-        test.close();
     }
 
 
-    private static LGBMDataset datasetFromResource(String file, LGBMDataset parent) throws LGBMException, IOException {
+    private static LGBMDataset datasetFromResource(String file, LGBMDataset parent, boolean withPosition) throws LGBMException, IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(RankingIntegrationTest.class.getResourceAsStream(file))));
         ArrayList<String> lines = reader.lines().map(line -> {
             int commentIndex = line.indexOf('#');
@@ -65,6 +78,7 @@ public class RankingIntegrationTest {
         double[] features = new double[maxFeatureId * rows];
         float[] labels = new float[rows];
         int[] groups = new int[queries];
+        int[] positions = new int[rows];
         String[] featureNames = new String[maxFeatureId];
         for (int i=1; i <= maxFeatureId; i++) {
             featureNames[i-1] = "f"+i;
@@ -72,11 +86,13 @@ public class RankingIntegrationTest {
         int lastGroup = Integer.MIN_VALUE;
         int lastCount = 0;
         int groupIndex = 0;
+        int position = 0;
         for (int row = 0; row < rows; row++) {
             String line = lines.get(row);
             String[] tokens = line.split(" ");
             float label = Float.parseFloat(tokens[0]);
             labels[row] = label;
+            positions[row] = position;
             int group = Integer.parseInt(tokens[1].split(":")[1]);
             if (group != lastGroup) {
                 // next query
@@ -87,6 +103,7 @@ public class RankingIntegrationTest {
                 }
                 lastGroup = group;
                 lastCount = 1;
+                position = 0;
             } else {
                 lastCount++;
             }
@@ -97,6 +114,7 @@ public class RankingIntegrationTest {
                 double value = Double.parseDouble(feature[1]);
                 features[row * maxFeatureId + id] = value;
             }
+            position++;
         }
         groups[groupIndex] = lastCount;
 
@@ -106,6 +124,7 @@ public class RankingIntegrationTest {
         dataset.setFeatureNames(featureNames);
         dataset.setField("label", labels);
         dataset.setField("group", groups);
+        if (withPosition) dataset.setField("position", positions);
         return dataset;
     }
 
