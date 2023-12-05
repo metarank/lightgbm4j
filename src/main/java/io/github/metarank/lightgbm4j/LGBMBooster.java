@@ -131,7 +131,7 @@ public class LGBMBooster implements AutoCloseable {
         } else {
             logger.info("Loading native lib from resource " + path + "/" + name);
             String tmp = System.getProperty("java.io.tmpdir");
-            File libFile = new File(tmp + File.separator + "lightgbm4j_" + name);
+            File libFile = new File(tmp + File.separator + name);
             if (libFile.exists()) {
                 logger.info(libFile + " already exists");
             } else {
