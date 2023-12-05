@@ -164,7 +164,43 @@ train.close();
 test.close();
 ```
 
-## Custom objectives
+### Categorical features
+
+LightGBM supports defining features as categorical. To make this work with LightGBM4j, you need to do the following:
+
+* Set their names with `setFeatureNames` so you can reference them later in options
+* Mark them as `categorical_feature` in booster options.
+
+Given the dataset file in the LibSVM format, where categories are index-encoded:
+
+```
+1 0:7 1:2 2:3 3:20 4:15 5:38 6:29 7:201
+0 0:5 1:15 2:2 3:1859 4:1 5:156 6:164 7:2475
+0 0:2 1:12 2:6 3:648 4:13 5:29 6:38 7:201
+1 0:10 1:26 2:5 3:1235 4:14 5:82 6:205 7:931
+0 0:6 1:18 2:1 3:737 4:12 5:224 6:162 7:2176
+0 0:4 1:12 3:1845 4:18 5:83 6:49 7:1491
+0 0:3 2:3 3:1652 4:20 5:2 6:180 7:332
+0 0:3 1:21 2:3 3:2010 4:16 5:216 6:69 7:911
+0 0:3 1:3 3:1555 4:1 5:84 6:81 7:1192
+0 0:8 1:2 2:6 3:1008 4:16 5:216 6:228 7:130
+```
+
+You can load and use them in the following way:
+
+```java
+LGBMDataset ds = LGBMDataset.createFromFile("./src/test/resources/categorical.data", "", null);
+ds.setFeatureNames(new String[]{"f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7"});
+String params = "objective=binary label=name:Classification categorical_feature=f0,f1,f2,f3,f4,f5,f6,f7";
+LGBMBooster booster = LGBMBooster.create(ds, params);
+for (int i=0; i<10; i++) {
+    booster.updateOneIter();
+    double[] eval1 = booster.getEval(0);
+    System.out.println("train " + eval1[0]);
+}
+```
+
+### Custom objectives
 
 LightGBM4j supports using custom objective functions, but it doesn't provide any high-level wrappers as python API does. 
 
