@@ -8,22 +8,22 @@
 
 package com.microsoft.ml.lightgbm;
 
-public class SWIGTYPE_p_p_float {
+public class SWIGTYPE_p_ArrowArray {
   private transient long swigCPtr;
 
-  protected SWIGTYPE_p_p_float(long cPtr, @SuppressWarnings("unused") boolean futureUse) {
+  protected SWIGTYPE_p_ArrowArray(long cPtr, @SuppressWarnings("unused") boolean futureUse) {
     swigCPtr = cPtr;
   }
 
-  protected SWIGTYPE_p_p_float() {
+  protected SWIGTYPE_p_ArrowArray() {
     swigCPtr = 0;
   }
 
-  protected static long getCPtr(SWIGTYPE_p_p_float obj) {
+  protected static long getCPtr(SWIGTYPE_p_ArrowArray obj) {
     return (obj == null) ? 0 : obj.swigCPtr;
   }
 
-  protected static long swigRelease(SWIGTYPE_p_p_float obj) {
+  protected static long swigRelease(SWIGTYPE_p_ArrowArray obj) {
     return (obj == null) ? 0 : obj.swigCPtr;
   }
 }

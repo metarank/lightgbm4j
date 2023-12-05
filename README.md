@@ -172,7 +172,7 @@ LightGBM needs a tuple of 1st and 2nd order derivatives (gradients and hessians)
 
 ```java
 LGBMDataset dataset = LGBMDataset.createFromFile("cancer.csv", "header=true label=name:Classification", null);
-LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
+LGBMBooster booster = LGBMBooster.create(dataset, "objective=none metric=rmse label=name:Classification");
 // actual ground truth label values
 float y[] = dataset.getFieldFloat("label");
 
@@ -195,6 +195,10 @@ for (int it=0; it<10; it++) {
 booster.close();
 dataset.close();
 ```
+
+Note the following change in the LightGBM4 behavior:
+
+* you need to set `objective=none metric=<eval metric>` parameters to signal that we're going to use custom objective.
 
 ## Supported platforms
 

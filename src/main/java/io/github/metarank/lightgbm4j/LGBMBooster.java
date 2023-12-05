@@ -704,6 +704,7 @@ public class LGBMBooster implements AutoCloseable {
      * @throws LGBMException
      */
     public boolean updateOneIterCustom(float[] grad, float[] hess) throws LGBMException {
+
         SWIGTYPE_p_float gradHandle = new_floatArray(grad.length);
         for (int i=0; i<grad.length; i++) {
             floatArray_setitem(gradHandle, i, grad[i]);
