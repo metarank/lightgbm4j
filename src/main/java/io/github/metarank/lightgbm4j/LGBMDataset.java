@@ -198,7 +198,8 @@ public class LGBMDataset implements AutoCloseable {
      * @throws LGBMException
      */
     public void setField(String fieldName, int[] data) throws LGBMException {
-        if (!fieldName.equals("group")) throw new LGBMException("only group field can be int[]");
+        if (fieldName.equals("label")) throw new LGBMException("label can only be float[]");
+        if (fieldName.equals("weight")) throw new LGBMException("weight can only be float[]");
         SWIGTYPE_p_int dataBuffer = new_intArray(data.length);
         for (int i = 0; i < data.length; i++) {
             intArray_setitem(dataBuffer, i, data[i]);

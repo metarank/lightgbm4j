@@ -106,7 +106,7 @@ So if you do `parameters = "label=some_column_name"`, it will be ignored by the 
 `createFromMat`
 * to set these magical columns, you need to explicitly call `LGBMDataset.setField()` method.
 * `label` and `weight` columns [must be](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetSetField) `float[]`
-* `group` column [must be](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetSetField) `int[]`
+* `group` and `position` column [must be](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_DatasetSetField) `int[]`
 
 A full example of loading dataset from a matrix for a cancer dataset:
 ```java
@@ -198,6 +198,25 @@ for (int i=0; i<10; i++) {
     double[] eval1 = booster.getEval(0);
     System.out.println("train " + eval1[0]);
 }
+```
+
+### Position bias removal
+
+LightGBM 4.1+ can perform a [position-bias aware LTR/LambdaMART](https://lightgbm.readthedocs.io/en/latest/Advanced-Topics.html#support-for-position-bias-treatment) training. To perform it with lightgbm4j you need to explicitly define the `position` field as described in the upstream LightGBM docs:
+
+```java
+float[] matrix = new float[] {
+        // query group 1
+        1.0f, 2.0f, // doc1
+        3.0f, 4.0f, // doc2
+        // query group 2
+        1.0f, 2.0f, // doc1
+        3.0f, 4.0f}; // doc2
+LGBMDataset ds = LGBMDataset.createFromMat(matrix, 4, 2, true, "", null);
+ds.setField("label", new float[] {1.0, 0.0, 1.0, 0.0}); // set relevance labels
+ds.setField("group", new int[] {2, 2}); // set document-to-group mapping
+ds.setField("position", new int[] {0, 1, 2, 3, 0, 1, 2, 3}); // bias classes
+LGBMBooster booster = LGBMBooster.create(ds, "objective=lambdarank");
 ```
 
 ### Custom objectives
