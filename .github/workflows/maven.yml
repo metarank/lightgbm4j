@@ -14,7 +14,7 @@ jobs:
     runs-on: ${{ matrix.platform }}
     strategy:
       matrix:
-        java: [11, 17]
+        java: [11, 17, 21]
         platform: [ubuntu-20.04, macos-11, windows-2019]
     steps:
     - name: install libomp
