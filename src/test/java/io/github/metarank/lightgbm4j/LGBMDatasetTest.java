@@ -95,4 +95,11 @@ public class LGBMDatasetTest {
         ds.close();
         ds.close();
     }
+
+    @Test void testUseAfterClose() throws LGBMException {
+        LGBMDataset ds = LGBMDataset.createFromMat(new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "", null);
+        ds.close();
+        assertThrows(LGBMException.class, ds::getFeatureNames);
+
+    }
 }
