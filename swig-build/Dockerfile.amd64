@@ -1,0 +1,13 @@
+FROM  ubuntu:focal-20240427
+RUN apt-get update
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get install -y --no-install-recommends openjdk-11-jdk gcc g++ build-essential git software-properties-common lsb-release dirmngr swig4.0 gpg-agent ca-certificates
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 1A127079A92F09ED
+RUN apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
+RUN apt update && apt install -y kitware-archive-keyring
+RUN apt update && apt install -y cmake
+RUN git clone --recursive --depth 1 --branch v4.3.0 https://github.com/microsoft/LightGBM
+WORKDIR /LightGBM
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/
+RUN cmake -B build -S . -DUSE_SWIG=ON
+RUN cmake --build build -j6

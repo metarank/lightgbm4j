@@ -340,7 +340,18 @@ public class LGBMBoosterTest {
         LGBMDataset ds = LGBMDataset.createFromMat(new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "", null);
         LGBMBooster booster = LGBMBooster.create(ds, "");
         booster.close();
+        assertThrows(LGBMException.class, booster::close);
+
+    }
+
+    @Test void testUseAfterClose() throws LGBMException {
+        LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification", null);
+        LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
+        booster.updateOneIter();
+        booster.updateOneIter();
+        booster.updateOneIter();
         booster.close();
+        assertThrows(LGBMException.class, () -> booster.getPredict(0));
     }
 
     private float[] randomArray(int size) {
