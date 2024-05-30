@@ -33,10 +33,10 @@ jobs:
     - name: Cache maven packages
       uses: actions/cache@v2
       env:
-        cache-name: cache-mvn
+        cache-name: cache-mvn2
       with:
         path: ~/.m2
-        key: ${{ runner.os }}-build2-${{ env.cache-name }}-${{ hashFiles('**/pom.xml') }}
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
