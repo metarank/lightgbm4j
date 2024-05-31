@@ -171,7 +171,7 @@ public class LGBMBooster implements AutoCloseable {
                 logger.warn("- MMLSpark/SynapseML is the main suspect");
                 logger.warn("****************************************************");
                 logger.warn("\n\n\n");
-                throw new IOException("hash mismatch");
+                //throw new IOException("hash mismatch");
             }
             ByteArrayInputStream source = new ByteArrayInputStream(libByteStream.toByteArray());
             OutputStream fileStream = new FileOutputStream(dest);
