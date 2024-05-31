@@ -30,17 +30,17 @@ jobs:
       with:
         java-version: ${{ matrix.java }}
 
-#    - name: Cache maven packages
-#      uses: actions/cache@v2
-#      env:
-#        cache-name: cache-mvn2
-#      with:
-#        path: ~/.m2
-#        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/pom.xml') }}
-#        restore-keys: |
-#          ${{ runner.os }}-build-${{ env.cache-name }}-
-#          ${{ runner.os }}-build-
-#          ${{ runner.os }}-
+    - name: Cache maven packages
+      uses: actions/cache@v2
+      env:
+        cache-name: cache-mvn2
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
     - name: Build with Maven
       run: mvn -B compile --file pom.xml
     - name: Run tests
