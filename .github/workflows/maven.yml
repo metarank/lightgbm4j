@@ -33,6 +33,12 @@ jobs:
           - jvm: 11
             platform: windows-2022
             architecture: x64
+          - jvm: 17
+            platform: windows-2022
+            architecture: x64
+          - jvm: 21
+            platform: windows-2022
+            architecture: x64
     steps:
     - name: install libomp
       run: brew install libomp
