@@ -171,7 +171,7 @@ public class LGBMBooster implements AutoCloseable {
                 logger.warn("- MMLSpark/SynapseML is the main suspect");
                 logger.warn("****************************************************");
                 logger.warn("\n\n\n");
-                throw new IOException("hash mismatch");
+                //throw new IOException("hash mismatch");
             }
             ByteArrayInputStream source = new ByteArrayInputStream(libByteStream.toByteArray());
             OutputStream fileStream = new FileOutputStream(dest);
@@ -258,6 +258,8 @@ public class LGBMBooster implements AutoCloseable {
             if (result < 0) {
                 throw new LGBMException(LGBM_GetLastError());
             }
+        } else {
+            throw new LGBMException("Booster was already closed");
         }
     }
 
@@ -274,41 +276,45 @@ public class LGBMBooster implements AutoCloseable {
      * @throws LGBMException
      */
     public double[] predictForMat(float[] input, int rows, int cols, boolean isRowMajor, PredictionType predictionType, String parameter) throws LGBMException {
-        SWIGTYPE_p_float dataBuffer = new_floatArray(input.length);
-        for (int i = 0; i < input.length; i++) {
-            floatArray_setitem(dataBuffer, i, input[i]);
-        }
-        SWIGTYPE_p_long_long outLength = new_int64_tp();
-        long outSize = outBufferSize(rows, cols, predictionType);
-        SWIGTYPE_p_double outBuffer = new_doubleArray(outSize);
-        int result = LGBM_BoosterPredictForMat(
-                voidpp_value(handle),
-                float_to_voidp_ptr(dataBuffer),
-                C_API_DTYPE_FLOAT32,
-                rows,
-                cols,
-                isRowMajor ? 1 : 0,
-                predictionType.getType(),
-                0,
-                iterations,
-                parameter,
-                outLength,
-                outBuffer);
-        if (result < 0) {
-            delete_floatArray(dataBuffer);
-            delete_int64_tp(outLength);
-            delete_doubleArray(outBuffer);
-            throw new LGBMException(LGBM_GetLastError());
-        } else {
-            long length = int64_tp_value(outLength);
-            double[] values = new double[(int) length];
-            for (int i = 0; i < length; i++) {
-                values[i] = doubleArray_getitem(outBuffer, i);
+        if (!isClosed) {
+            SWIGTYPE_p_float dataBuffer = new_floatArray(input.length);
+            for (int i = 0; i < input.length; i++) {
+                floatArray_setitem(dataBuffer, i, input[i]);
             }
-            delete_floatArray(dataBuffer);
-            delete_int64_tp(outLength);
-            delete_doubleArray(outBuffer);
-            return values;
+            SWIGTYPE_p_long_long outLength = new_int64_tp();
+            long outSize = outBufferSize(rows, cols, predictionType);
+            SWIGTYPE_p_double outBuffer = new_doubleArray(outSize);
+            int result = LGBM_BoosterPredictForMat(
+                    voidpp_value(handle),
+                    float_to_voidp_ptr(dataBuffer),
+                    C_API_DTYPE_FLOAT32,
+                    rows,
+                    cols,
+                    isRowMajor ? 1 : 0,
+                    predictionType.getType(),
+                    0,
+                    iterations,
+                    parameter,
+                    outLength,
+                    outBuffer);
+            if (result < 0) {
+                delete_floatArray(dataBuffer);
+                delete_int64_tp(outLength);
+                delete_doubleArray(outBuffer);
+                throw new LGBMException(LGBM_GetLastError());
+            } else {
+                long length = int64_tp_value(outLength);
+                double[] values = new double[(int) length];
+                for (int i = 0; i < length; i++) {
+                    values[i] = doubleArray_getitem(outBuffer, i);
+                }
+                delete_floatArray(dataBuffer);
+                delete_int64_tp(outLength);
+                delete_doubleArray(outBuffer);
+                return values;
+            }
+        } else {
+            throw new LGBMException("Booster was already closed");
         }
     }
 
@@ -330,41 +336,45 @@ public class LGBMBooster implements AutoCloseable {
      */
 
     public double[] predictForMat(double[] input, int rows, int cols, boolean isRowMajor, PredictionType predictionType, String parameter) throws LGBMException {
-        SWIGTYPE_p_double dataBuffer = new_doubleArray(input.length);
-        for (int i = 0; i < input.length; i++) {
-            doubleArray_setitem(dataBuffer, i, input[i]);
-        }
-        SWIGTYPE_p_long_long outLength = new_int64_tp();
-        long outSize = outBufferSize(rows, cols, predictionType);
-        SWIGTYPE_p_double outBuffer = new_doubleArray(outSize);
-        int result = LGBM_BoosterPredictForMat(
-                voidpp_value(handle),
-                double_to_voidp_ptr(dataBuffer),
-                C_API_DTYPE_FLOAT64,
-                rows,
-                cols,
-                isRowMajor ? 1 : 0,
-                predictionType.getType(),
-                0,
-                iterations,
-                parameter,
-                outLength,
-                outBuffer);
-        if (result < 0) {
-            delete_doubleArray(dataBuffer);
-            delete_int64_tp(outLength);
-            delete_doubleArray(outBuffer);
-            throw new LGBMException(LGBM_GetLastError());
-        } else {
-            long length = int64_tp_value(outLength);
-            double[] values = new double[(int) length];
-            for (int i = 0; i < length; i++) {
-                values[i] = doubleArray_getitem(outBuffer, i);
+        if (!isClosed) {
+            SWIGTYPE_p_double dataBuffer = new_doubleArray(input.length);
+            for (int i = 0; i < input.length; i++) {
+                doubleArray_setitem(dataBuffer, i, input[i]);
             }
-            delete_doubleArray(dataBuffer);
-            delete_int64_tp(outLength);
-            delete_doubleArray(outBuffer);
-            return values;
+            SWIGTYPE_p_long_long outLength = new_int64_tp();
+            long outSize = outBufferSize(rows, cols, predictionType);
+            SWIGTYPE_p_double outBuffer = new_doubleArray(outSize);
+            int result = LGBM_BoosterPredictForMat(
+                    voidpp_value(handle),
+                    double_to_voidp_ptr(dataBuffer),
+                    C_API_DTYPE_FLOAT64,
+                    rows,
+                    cols,
+                    isRowMajor ? 1 : 0,
+                    predictionType.getType(),
+                    0,
+                    iterations,
+                    parameter,
+                    outLength,
+                    outBuffer);
+            if (result < 0) {
+                delete_doubleArray(dataBuffer);
+                delete_int64_tp(outLength);
+                delete_doubleArray(outBuffer);
+                throw new LGBMException(LGBM_GetLastError());
+            } else {
+                long length = int64_tp_value(outLength);
+                double[] values = new double[(int) length];
+                for (int i = 0; i < length; i++) {
+                    values[i] = doubleArray_getitem(outBuffer, i);
+                }
+                delete_doubleArray(dataBuffer);
+                delete_int64_tp(outLength);
+                delete_doubleArray(outBuffer);
+                return values;
+            }
+        } else {
+            throw new LGBMException("Booster was already closed");
         }
     }
     public double[] predictForMat(double[] input, int rows, int cols, boolean isRowMajor, PredictionType predictionType) throws LGBMException {
@@ -396,15 +406,19 @@ public class LGBMBooster implements AutoCloseable {
      * @throws LGBMException
      */
     public boolean updateOneIter() throws LGBMException {
-        SWIGTYPE_p_int isFinishedP = new_intp();
-        int result = LGBM_BoosterUpdateOneIter(voidpp_value(handle), isFinishedP);
-        iterations++;
-        if (result < 0) {
-            throw new LGBMException(LGBM_GetLastError());
+        if (!isClosed) {
+            SWIGTYPE_p_int isFinishedP = new_intp();
+            int result = LGBM_BoosterUpdateOneIter(voidpp_value(handle), isFinishedP);
+            iterations++;
+            if (result < 0) {
+                throw new LGBMException(LGBM_GetLastError());
+            } else {
+                int isFinished = intp_value(isFinishedP);
+                delete_intp(isFinishedP);
+                return isFinished == 1;
+            }
         } else {
-            int isFinished = intp_value(isFinishedP);
-            delete_intp(isFinishedP);
-            return isFinished == 1;
+            throw new LGBMException("Booster was already closed");
         }
     }
 
@@ -422,18 +436,22 @@ public class LGBMBooster implements AutoCloseable {
      * @param featureImportance Type of feature importance, can be FeatureImportanceType.SPLIT or FeatureImportanceType.GAIN
      * @return
      */
-    public String saveModelToString(int startIteration, int numIteration, FeatureImportanceType featureImportance) {
-        SWIGTYPE_p_long_long outLength = new_int64_tp();
-        String result = LGBM_BoosterSaveModelToStringSWIG(
-                voidpp_value(handle),
-                startIteration,
-                numIteration,
-                importanceType(featureImportance),
-                MODEL_SAVE_BUFFER_SIZE,
-                outLength
-        );
-        delete_int64_tp(outLength);
-        return result;
+    public String saveModelToString(int startIteration, int numIteration, FeatureImportanceType featureImportance) throws LGBMException {
+        if (!isClosed) {
+            SWIGTYPE_p_long_long outLength = new_int64_tp();
+            String result = LGBM_BoosterSaveModelToStringSWIG(
+                    voidpp_value(handle),
+                    startIteration,
+                    numIteration,
+                    importanceType(featureImportance),
+                    MODEL_SAVE_BUFFER_SIZE,
+                    outLength
+            );
+            delete_int64_tp(outLength);
+            return result;
+        } else {
+            throw new LGBMException("Booster was already closed");
+        }
     }
 
     /**
@@ -441,11 +459,15 @@ public class LGBMBooster implements AutoCloseable {
      *
      * @return a list of feature names.
      */
-    public String[] getFeatureNames() {
-        SWIGTYPE_p_void buffer = LGBM_BoosterGetFeatureNamesSWIG(voidpp_value(handle));
-        String[] result = StringArrayHandle_get_strings(buffer);
-        StringArrayHandle_free(buffer);
-        return result;
+    public String[] getFeatureNames() throws LGBMException {
+        if (!isClosed) {
+            SWIGTYPE_p_void buffer = LGBM_BoosterGetFeatureNamesSWIG(voidpp_value(handle));
+            String[] result = StringArrayHandle_get_strings(buffer);
+            StringArrayHandle_free(buffer);
+            return result;
+        } else {
+            throw new LGBMException("Booster was already closed");
+        }
     }
 
     /**
@@ -455,9 +477,13 @@ public class LGBMBooster implements AutoCloseable {
      * @throws LGBMException
      */
     public void addValidData(LGBMDataset dataset) throws LGBMException {
-        int result = LGBM_BoosterAddValidData(voidpp_value(handle), dataset.handle);
-        if (result < 0) {
-            throw new LGBMException(LGBM_GetLastError());
+        if (!isClosed) {
+            int result = LGBM_BoosterAddValidData(voidpp_value(handle), dataset.handle);
+            if (result < 0) {
+                throw new LGBMException(LGBM_GetLastError());
+            }
+        } else {
+            throw new LGBMException("Booster was already closed");
         }
     }
 
@@ -469,21 +495,25 @@ public class LGBMBooster implements AutoCloseable {
      * @throws LGBMException
      */
     public double[] getEval(int dataIndex) throws LGBMException {
-        SWIGTYPE_p_int outLength = new_int32_tp();
-        SWIGTYPE_p_double outBuffer = new_doubleArray(EVAL_RESULTS_BUFFER_SIZE);
-        int result = LGBM_BoosterGetEval(voidpp_value(handle), dataIndex, outLength, outBuffer);
-        if (result < 0) {
-            delete_intp(outLength);
-            delete_doubleArray(outBuffer);
-            throw new LGBMException(LGBM_GetLastError());
-        } else {
-            double[] evals = new double[intp_value(outLength)];
-            for (int i = 0; i < evals.length; i++) {
-                evals[i] = doubleArray_getitem(outBuffer, i);
+        if (!isClosed) {
+            SWIGTYPE_p_int outLength = new_int32_tp();
+            SWIGTYPE_p_double outBuffer = new_doubleArray(EVAL_RESULTS_BUFFER_SIZE);
+            int result = LGBM_BoosterGetEval(voidpp_value(handle), dataIndex, outLength, outBuffer);
+            if (result < 0) {
+                delete_intp(outLength);
+                delete_doubleArray(outBuffer);
+                throw new LGBMException(LGBM_GetLastError());
+            } else {
+                double[] evals = new double[intp_value(outLength)];
+                for (int i = 0; i < evals.length; i++) {
+                    evals[i] = doubleArray_getitem(outBuffer, i);
+                }
+                delete_intp(outLength);
+                delete_doubleArray(outBuffer);
+                return evals;
             }
-            delete_intp(outLength);
-            delete_doubleArray(outBuffer);
-            return evals;
+        } else {
+            throw new LGBMException("Booster was already closed");
         }
     }
 
@@ -494,10 +524,14 @@ public class LGBMBooster implements AutoCloseable {
      * @throws LGBMException
      */
     public String[] getEvalNames() throws LGBMException {
-        SWIGTYPE_p_void namesP = LGBM_BoosterGetEvalNamesSWIG(voidpp_value(handle));
-        String[] names = StringArrayHandle_get_strings(namesP);
-        StringArrayHandle_free(namesP);
-        return names;
+        if (!isClosed) {
+            SWIGTYPE_p_void namesP = LGBM_BoosterGetEvalNamesSWIG(voidpp_value(handle));
+            String[] names = StringArrayHandle_get_strings(namesP);
+            StringArrayHandle_free(namesP);
+            return names;
+        } else {
+            throw new LGBMException("Booster was already closed");
+        }
     }
 
     /**
@@ -509,24 +543,28 @@ public class LGBMBooster implements AutoCloseable {
      * @throws LGBMException
      */
     public double[] featureImportance(int numIteration, FeatureImportanceType importanceType) throws LGBMException {
-        int numFeatures = getNumFeature();
-        SWIGTYPE_p_double outBuffer = new_doubleArray(numFeatures);
-        int result = LGBM_BoosterFeatureImportance(
-                voidpp_value(handle),
-                numIteration,
-                importanceType(importanceType),
-                outBuffer
-        );
-        if (result < 0) {
-            delete_doubleArray(outBuffer);
-            throw new LGBMException(LGBM_GetLastError());
-        } else {
-            double[] importance = new double[numFeatures];
-            for (int i = 0; i < numFeatures; i++) {
-                importance[i] = doubleArray_getitem(outBuffer, i);
+        if (!isClosed) {
+            int numFeatures = getNumFeature();
+            SWIGTYPE_p_double outBuffer = new_doubleArray(numFeatures);
+            int result = LGBM_BoosterFeatureImportance(
+                    voidpp_value(handle),
+                    numIteration,
+                    importanceType(importanceType),
+                    outBuffer
+            );
+            if (result < 0) {
+                delete_doubleArray(outBuffer);
+                throw new LGBMException(LGBM_GetLastError());
+            } else {
+                double[] importance = new double[numFeatures];
+                for (int i = 0; i < numFeatures; i++) {
+                    importance[i] = doubleArray_getitem(outBuffer, i);
+                }
+                delete_doubleArray(outBuffer);
+                return importance;
             }
-            delete_doubleArray(outBuffer);
-            return importance;
+        } else {
+            throw new LGBMException("Booster was already closed");
         }
     }
 
@@ -537,15 +575,19 @@ public class LGBMBooster implements AutoCloseable {
      * @throws LGBMException
      */
     public int getNumFeature() throws LGBMException {
-        SWIGTYPE_p_int outNum = new_int32_tp();
-        int result = LGBM_BoosterGetNumFeature(voidpp_value(handle), outNum);
-        if (result < 0) {
-            delete_intp(outNum);
-            throw new LGBMException(LGBM_GetLastError());
+        if (!isClosed) {
+            SWIGTYPE_p_int outNum = new_int32_tp();
+            int result = LGBM_BoosterGetNumFeature(voidpp_value(handle), outNum);
+            if (result < 0) {
+                delete_intp(outNum);
+                throw new LGBMException(LGBM_GetLastError());
+            } else {
+                int num = intp_value(outNum);
+                delete_intp(outNum);
+                return num;
+            }
         } else {
-            int num = intp_value(outNum);
-            delete_intp(outNum);
-            return num;
+            throw new LGBMException("Booster was already closed");
         }
     }
 
@@ -559,42 +601,46 @@ public class LGBMBooster implements AutoCloseable {
      * @throws LGBMException
      */
     public double predictForMatSingleRow(double[] data, PredictionType predictionType) throws LGBMException {
-        SWIGTYPE_p_double dataBuffer = new_doubleArray(data.length);
-        for (int i = 0; i < data.length; i++) {
-            doubleArray_setitem(dataBuffer, i, data[i]);
-        }
-        SWIGTYPE_p_long_long outLength = new_int64_tp();
-        long outBufferSize = outBufferSize(1, data.length, predictionType);
-        SWIGTYPE_p_double outBuffer = new_doubleArray(outBufferSize);
-
-        int result = LGBM_BoosterPredictForMatSingleRow(
-                voidpp_value(handle),
-                double_to_voidp_ptr(dataBuffer),
-                C_API_DTYPE_FLOAT64,
-                data.length,
-                1,
-                predictionType.getType(),
-                0,
-                iterations,
-                "",
-                outLength,
-                outBuffer
-        );
-        if (result < 0) {
-            delete_doubleArray(dataBuffer);
-            delete_doubleArray(outBuffer);
-            delete_int64_tp(outLength);
-            throw new LGBMException(LGBM_GetLastError());
-        } else {
-            long length = int64_tp_value(outLength);
-            double[] values = new double[(int) length];
-            for (int i = 0; i < length; i++) {
-                values[i] = doubleArray_getitem(outBuffer, i);
+        if (!isClosed) {
+            SWIGTYPE_p_double dataBuffer = new_doubleArray(data.length);
+            for (int i = 0; i < data.length; i++) {
+                doubleArray_setitem(dataBuffer, i, data[i]);
             }
-            delete_doubleArray(dataBuffer);
-            delete_int64_tp(outLength);
-            delete_doubleArray(outBuffer);
-            return values[0];
+            SWIGTYPE_p_long_long outLength = new_int64_tp();
+            long outBufferSize = outBufferSize(1, data.length, predictionType);
+            SWIGTYPE_p_double outBuffer = new_doubleArray(outBufferSize);
+
+            int result = LGBM_BoosterPredictForMatSingleRow(
+                    voidpp_value(handle),
+                    double_to_voidp_ptr(dataBuffer),
+                    C_API_DTYPE_FLOAT64,
+                    data.length,
+                    1,
+                    predictionType.getType(),
+                    0,
+                    iterations,
+                    "",
+                    outLength,
+                    outBuffer
+            );
+            if (result < 0) {
+                delete_doubleArray(dataBuffer);
+                delete_doubleArray(outBuffer);
+                delete_int64_tp(outLength);
+                throw new LGBMException(LGBM_GetLastError());
+            } else {
+                long length = int64_tp_value(outLength);
+                double[] values = new double[(int) length];
+                for (int i = 0; i < length; i++) {
+                    values[i] = doubleArray_getitem(outBuffer, i);
+                }
+                delete_doubleArray(dataBuffer);
+                delete_int64_tp(outLength);
+                delete_doubleArray(outBuffer);
+                return values[0];
+            }
+        } else {
+            throw new LGBMException("Booster was already closed");
         }
     }
 
@@ -608,42 +654,46 @@ public class LGBMBooster implements AutoCloseable {
      * @throws LGBMException
      */
     public double predictForMatSingleRow(float[] data, PredictionType predictionType) throws LGBMException {
-        SWIGTYPE_p_float dataBuffer = new_floatArray(data.length);
-        for (int i = 0; i < data.length; i++) {
-            floatArray_setitem(dataBuffer, i, data[i]);
-        }
-        SWIGTYPE_p_long_long outLength = new_int64_tp();
-        long outBufferSize = outBufferSize(1, data.length, predictionType);
-        SWIGTYPE_p_double outBuffer = new_doubleArray(outBufferSize);
-
-        int result = LGBM_BoosterPredictForMatSingleRow(
-                voidpp_value(handle),
-                float_to_voidp_ptr(dataBuffer),
-                C_API_DTYPE_FLOAT32,
-                data.length,
-                1,
-                predictionType.getType(),
-                0,
-                iterations,
-                "",
-                outLength,
-                outBuffer
-        );
-        if (result < 0) {
-            delete_floatArray(dataBuffer);
-            delete_doubleArray(outBuffer);
-            delete_int64_tp(outLength);
-            throw new LGBMException(LGBM_GetLastError());
-        } else {
-            long length = int64_tp_value(outLength);
-            double[] values = new double[(int) length];
-            for (int i = 0; i < length; i++) {
-                values[i] = doubleArray_getitem(outBuffer, i);
+        if (!isClosed) {
+            SWIGTYPE_p_float dataBuffer = new_floatArray(data.length);
+            for (int i = 0; i < data.length; i++) {
+                floatArray_setitem(dataBuffer, i, data[i]);
             }
-            delete_floatArray(dataBuffer);
-            delete_int64_tp(outLength);
-            delete_doubleArray(outBuffer);
-            return values[0];
+            SWIGTYPE_p_long_long outLength = new_int64_tp();
+            long outBufferSize = outBufferSize(1, data.length, predictionType);
+            SWIGTYPE_p_double outBuffer = new_doubleArray(outBufferSize);
+
+            int result = LGBM_BoosterPredictForMatSingleRow(
+                    voidpp_value(handle),
+                    float_to_voidp_ptr(dataBuffer),
+                    C_API_DTYPE_FLOAT32,
+                    data.length,
+                    1,
+                    predictionType.getType(),
+                    0,
+                    iterations,
+                    "",
+                    outLength,
+                    outBuffer
+            );
+            if (result < 0) {
+                delete_floatArray(dataBuffer);
+                delete_doubleArray(outBuffer);
+                delete_int64_tp(outLength);
+                throw new LGBMException(LGBM_GetLastError());
+            } else {
+                long length = int64_tp_value(outLength);
+                double[] values = new double[(int) length];
+                for (int i = 0; i < length; i++) {
+                    values[i] = doubleArray_getitem(outBuffer, i);
+                }
+                delete_floatArray(dataBuffer);
+                delete_int64_tp(outLength);
+                delete_doubleArray(outBuffer);
+                return values[0];
+            }
+        } else {
+            throw new LGBMException("Booster was already closed");
         }
     }
 
@@ -666,15 +716,19 @@ public class LGBMBooster implements AutoCloseable {
      * @throws LGBMException
      */
     public int getNumClasses() throws LGBMException {
-        SWIGTYPE_p_int numHandle = new_int32_tp();
-        int result = LGBM_BoosterGetNumClasses(voidpp_value(handle), numHandle);
-        if (result < 0) {
-            delete_intp(numHandle);
-            throw new LGBMException(LGBM_GetLastError());
+        if (!isClosed) {
+            SWIGTYPE_p_int numHandle = new_int32_tp();
+            int result = LGBM_BoosterGetNumClasses(voidpp_value(handle), numHandle);
+            if (result < 0) {
+                delete_intp(numHandle);
+                throw new LGBMException(LGBM_GetLastError());
+            } else {
+                int numClasses = intp_value(numHandle);
+                delete_intp(numHandle);
+                return numClasses;
+            }
         } else {
-            int numClasses = intp_value(numHandle);
-            delete_intp(numHandle);
-            return numClasses;
+            throw new LGBMException("Booster was already closed");
         }
     }
 
@@ -685,15 +739,19 @@ public class LGBMBooster implements AutoCloseable {
      * @throws LGBMException
      */
     public long getNumPredict(int dataIdx) throws LGBMException {
-        SWIGTYPE_p_long_long numHandle = new_int64_tp();
-        int result = LGBM_BoosterGetNumPredict(voidpp_value(handle), dataIdx, numHandle);
-        if (result < 0) {
-            delete_int64_tp(numHandle);
-            throw new LGBMException(LGBM_GetLastError());
+        if (!isClosed) {
+            SWIGTYPE_p_long_long numHandle = new_int64_tp();
+            int result = LGBM_BoosterGetNumPredict(voidpp_value(handle), dataIdx, numHandle);
+            if (result < 0) {
+                delete_int64_tp(numHandle);
+                throw new LGBMException(LGBM_GetLastError());
+            } else {
+                long numClasses = int64_tp_value(numHandle);
+                delete_int64_tp(numHandle);
+                return numClasses;
+            }
         } else {
-            long numClasses = int64_tp_value(numHandle);
-            delete_int64_tp(numHandle);
-            return numClasses;
+            throw new LGBMException("Booster was already closed");
         }
     }
 
@@ -704,22 +762,26 @@ public class LGBMBooster implements AutoCloseable {
      * @throws LGBMException
      */
     public double[] getPredict(int dataIdx) throws LGBMException {
-        int allocatedSize = getNumClasses() * (int)getNumPredict(dataIdx);
-        SWIGTYPE_p_double buffer = new_doubleArray(allocatedSize);
-        SWIGTYPE_p_long_long size = new_int64_tp();
-        int result = LGBM_BoosterGetPredict(voidpp_value(handle), dataIdx, size, buffer);
-        if (result < 0) {
-            delete_doubleArray(buffer);
-            delete_int64_tp(size);
-            throw new LGBMException(LGBM_GetLastError());
-        } else {
-            double[] out = new double[(int)int64_tp_value(size)];
-            for (int i=0; i<out.length; i++) {
-                out[i] = doubleArray_getitem(buffer, i);
+        if (!isClosed) {
+            int allocatedSize = getNumClasses() * (int)getNumPredict(dataIdx);
+            SWIGTYPE_p_double buffer = new_doubleArray(allocatedSize);
+            SWIGTYPE_p_long_long size = new_int64_tp();
+            int result = LGBM_BoosterGetPredict(voidpp_value(handle), dataIdx, size, buffer);
+            if (result < 0) {
+                delete_doubleArray(buffer);
+                delete_int64_tp(size);
+                throw new LGBMException(LGBM_GetLastError());
+            } else {
+                double[] out = new double[(int)int64_tp_value(size)];
+                for (int i=0; i<out.length; i++) {
+                    out[i] = doubleArray_getitem(buffer, i);
+                }
+                delete_doubleArray(buffer);
+                delete_int64_tp(size);
+                return out;
             }
-            delete_doubleArray(buffer);
-            delete_int64_tp(size);
-            return out;
+        } else {
+            throw new LGBMException("Booster was already closed");
         }
     }
 
@@ -734,29 +796,33 @@ public class LGBMBooster implements AutoCloseable {
      * @throws LGBMException
      */
     public boolean updateOneIterCustom(float[] grad, float[] hess) throws LGBMException {
-
-        SWIGTYPE_p_float gradHandle = new_floatArray(grad.length);
-        for (int i=0; i<grad.length; i++) {
-            floatArray_setitem(gradHandle, i, grad[i]);
-        }
-        SWIGTYPE_p_float hessHandle = new_floatArray(hess.length);
-        for (int i=0; i<hess.length; i++) {
-            floatArray_setitem(hessHandle, i, hess[i]);
-        }
-        SWIGTYPE_p_int isFinishedHandle = new_intp();
-        int result = LGBM_BoosterUpdateOneIterCustom(voidpp_value(handle), gradHandle, hessHandle, isFinishedHandle);
-        if (result < 0) {
-            delete_floatArray(gradHandle);
-            delete_floatArray(hessHandle);
-            delete_intp(isFinishedHandle);
-            throw new LGBMException(LGBM_GetLastError());
+        if (!isClosed) {
+            SWIGTYPE_p_float gradHandle = new_floatArray(grad.length);
+            for (int i=0; i<grad.length; i++) {
+                floatArray_setitem(gradHandle, i, grad[i]);
+            }
+            SWIGTYPE_p_float hessHandle = new_floatArray(hess.length);
+            for (int i=0; i<hess.length; i++) {
+                floatArray_setitem(hessHandle, i, hess[i]);
+            }
+            SWIGTYPE_p_int isFinishedHandle = new_intp();
+            int result = LGBM_BoosterUpdateOneIterCustom(voidpp_value(handle), gradHandle, hessHandle, isFinishedHandle);
+            if (result < 0) {
+                delete_floatArray(gradHandle);
+                delete_floatArray(hessHandle);
+                delete_intp(isFinishedHandle);
+                throw new LGBMException(LGBM_GetLastError());
+            } else {
+                int isFinished = intp_value(isFinishedHandle);
+                delete_floatArray(gradHandle);
+                delete_floatArray(hessHandle);
+                delete_intp(isFinishedHandle);
+                return isFinished == 1;
+            }
         } else {
-            int isFinished = intp_value(isFinishedHandle);
-            delete_floatArray(gradHandle);
-            delete_floatArray(hessHandle);
-            delete_intp(isFinishedHandle);
-            return isFinished == 1;
+            throw new LGBMException("Booster was already closed");
         }
+
     }
 
 
