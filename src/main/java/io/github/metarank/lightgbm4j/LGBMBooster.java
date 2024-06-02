@@ -134,6 +134,7 @@ public class LGBMBooster implements AutoCloseable {
             File libFile = new File(tmp + File.separator + name);
             if (libFile.exists()) {
                 logger.info(libFile + " already exists");
+                extractResource(path + name, name, libFile);
             } else {
                 extractResource(path + name, name, libFile);
             }
@@ -162,6 +163,11 @@ public class LGBMBooster implements AutoCloseable {
         try {
             byte[] digest = MessageDigest.getInstance("MD5").digest(libByteStream.toByteArray());
             String checksum = new BigInteger(1, digest).toString(16);
+            for (int i=0; i<32 - checksum.length(); i++) {
+                checksum = "0" + checksum;
+            }
+
+
             if (!checksum.equals(expectedDigest)) {
                 logger.warn("\n\n\n");
                 logger.warn("****************************************************");
