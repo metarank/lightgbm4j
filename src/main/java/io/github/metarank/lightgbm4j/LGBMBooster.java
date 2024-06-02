@@ -134,6 +134,7 @@ public class LGBMBooster implements AutoCloseable {
             File libFile = new File(tmp + File.separator + name);
             if (libFile.exists()) {
                 logger.info(libFile + " already exists");
+                extractResource(path + name, name, libFile);
             } else {
                 extractResource(path + name, name, libFile);
             }
