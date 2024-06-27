@@ -255,6 +255,48 @@ Note the following change in the LightGBM4 behavior:
 
 * you need to set `objective=none metric=<eval metric>` parameters to signal that we're going to use custom objective. Otherwise the LightGBM will complain on incorrect objective.
 
+### Low-latency predictions
+
+Raw LGBM API exposes multiple low-level ways to make predictions with lower latency:
+* Instead of `predictForMat`, you can use a single-row optimized `predictForMatSingleRow` method
+* LGBM my default still uses paralellism for single-row predictions, which still affects final latency. Opt for including `threads=1` parameter for your prediction method calls.
+* LightGBM4J also exposes a low-level `predictForMatSingleRowFast` method, which pre-allocates internal structures once, and reuses them on each next call.
+
+#### Single-row prediction
+
+```java
+LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification", null);
+LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
+booster.updateOneIter();
+booster.updateOneIter();
+booster.updateOneIter();
+for (int i = 0; i < 10; i++) {
+    double pred1 = booster.predictForMatSingleRow(new double[]{1, 2, 3, 4, 5, 6, 7, 8, 9}, PredictionType.C_API_PREDICT_NORMAL);
+    assertTrue(pred1 > 0);
+    double pred2 = booster.predictForMatSingleRow(new float[]{1, 2, 3, 4, 5, 6, 7, 8, 9}, PredictionType.C_API_PREDICT_NORMAL);
+    assertTrue(pred2 > 0);
+}
+dataset.close();
+booster.close();
+```
+
+#### Single-row fast prediction
+
+```java
+LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification", null);
+LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
+booster.updateOneIter();
+booster.updateOneIter();
+booster.updateOneIter();
+LGBMBooster.FastConfig config = booster.predictForMatSingleRowFastInit(PredictionType.C_API_PREDICT_NORMAL, C_API_DTYPE_FLOAT32,9, "");
+double pred = booster.predictForMatSingleRowFast(config, new float[]{1, 2, 3, 4, 5, 6, 7, 8, 9}, PredictionType.C_API_PREDICT_NORMAL);
+assertTrue(Double.isFinite(pred));
+config.close();
+dataset.close();
+booster.close();
+
+```
+
 ## Supported platforms
 
 This code is tested to work well with Linux (Ubuntu 20.04), Windows (Server 2019) and MacOS 10.15/11. Mac M1 is also supported.
@@ -280,6 +322,8 @@ Supported methods:
 * [LGBM_BoosterLoadModelFromString](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterLoadModelFromString)
 * [LGBM_BoosterPredictForMat](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictForMat)
 * [LGBM_BoosterPredictForMatSingleRow](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictForMatSingleRow)
+* [LGBM_BoosterPredictForMatSingleRowFast](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictForMatSingleRowFast)
+* [LGBM_BoosterPredictForMatSingleRowFastInit](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictForMatSingleRowFastInit)
 * [LGBM_BoosterSaveModel](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterSaveModel)
 * [LGBM_BoosterSaveModelToString](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterSaveModelToString)
 * [LGBM_BoosterUpdateOneIter](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterUpdateOneIter)
@@ -314,8 +358,6 @@ Not yet supported:
 * [LGBM_BoosterPredictForCSRSingleRowFastInit](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictForCSRSingleRowFastInit)
 * [LGBM_BoosterPredictForFile](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictForFile)
 * [LGBM_BoosterPredictForMats](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictForMats)
-* [LGBM_BoosterPredictForMatSingleRowFast](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictForMatSingleRowFast)
-* [LGBM_BoosterPredictForMatSingleRowFastInit](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictForMatSingleRowFastInit)
 * [LGBM_BoosterPredictSparseOutput](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterPredictSparseOutput)
 * [LGBM_BoosterRefit](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterRefit)
 * [LGBM_BoosterResetParameter](https://lightgbm.readthedocs.io/en/latest/C-API.html#c.LGBM_BoosterResetParameter)

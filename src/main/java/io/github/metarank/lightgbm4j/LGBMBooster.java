@@ -703,6 +703,117 @@ public class LGBMBooster implements AutoCloseable {
         }
     }
 
+    public FastConfig predictForMatSingleRowFastInit(PredictionType predictionType, int dtype, int ncols, String parameter) throws LGBMException {
+        if (!isClosed) {
+            SWIGTYPE_p_p_void out = voidpp_handle();
+
+            int result = LGBM_BoosterPredictForMatSingleRowFastInit(
+                    voidpp_value(handle),
+                    predictionType.getType(),
+                    0,
+                    iterations,
+                    dtype,
+                    ncols,
+                    parameter,
+                    out
+            );
+            if (result < 0) {
+                delete_voidpp(out);
+                throw new LGBMException(LGBM_GetLastError());
+            } else {
+                return new FastConfig(out);
+            }
+        } else {
+            throw new LGBMException("Booster was already closed");
+        }
+    }
+
+    public static class FastConfig implements AutoCloseable {
+        public SWIGTYPE_p_p_void handle;
+        public FastConfig(SWIGTYPE_p_p_void handle) {
+            this.handle = handle;
+        }
+
+        @Override
+        public void close() throws Exception {
+            delete_voidpp(handle);
+        }
+    }
+    public double predictForMatSingleRowFast(FastConfig config, float[] data, PredictionType predictionType) throws LGBMException {
+        if (!isClosed) {
+            SWIGTYPE_p_float dataBuffer = new_floatArray(data.length);
+            for (int i = 0; i < data.length; i++) {
+                floatArray_setitem(dataBuffer, i, data[i]);
+            }
+            SWIGTYPE_p_long_long outLength = new_int64_tp();
+            long outBufferSize = outBufferSize(1, data.length, predictionType);
+            SWIGTYPE_p_double outBuffer = new_doubleArray(outBufferSize);
+
+            int result = LGBM_BoosterPredictForMatSingleRowFast(
+                    voidpp_value(config.handle),
+                    float_to_voidp_ptr(dataBuffer),
+                    outLength,
+                    outBuffer
+            );
+            if (result < 0) {
+                delete_floatArray(dataBuffer);
+                delete_doubleArray(outBuffer);
+                delete_int64_tp(outLength);
+                throw new LGBMException(LGBM_GetLastError());
+            } else {
+                long length = int64_tp_value(outLength);
+                double[] values = new double[(int) length];
+                for (int i = 0; i < length; i++) {
+                    values[i] = doubleArray_getitem(outBuffer, i);
+                }
+                delete_floatArray(dataBuffer);
+                delete_int64_tp(outLength);
+                delete_doubleArray(outBuffer);
+                return values[0];
+            }
+        } else {
+            throw new LGBMException("Booster was already closed");
+        }
+    }
+
+    public double predictForMatSingleRowFast(FastConfig config, double[] data, PredictionType predictionType) throws LGBMException {
+        if (!isClosed) {
+            SWIGTYPE_p_double dataBuffer = new_doubleArray(data.length);
+            for (int i = 0; i < data.length; i++) {
+                doubleArray_setitem(dataBuffer, i, data[i]);
+            }
+            SWIGTYPE_p_long_long outLength = new_int64_tp();
+            long outBufferSize = outBufferSize(1, data.length, predictionType);
+            SWIGTYPE_p_double outBuffer = new_doubleArray(outBufferSize);
+
+            int result = LGBM_BoosterPredictForMatSingleRowFast(
+                    voidpp_value(config.handle),
+                    double_to_voidp_ptr(dataBuffer),
+                    outLength,
+                    outBuffer
+            );
+            if (result < 0) {
+                delete_doubleArray(dataBuffer);
+                delete_doubleArray(outBuffer);
+                delete_int64_tp(outLength);
+                throw new LGBMException(LGBM_GetLastError());
+            } else {
+                long length = int64_tp_value(outLength);
+                double[] values = new double[(int) length];
+                for (int i = 0; i < length; i++) {
+                    values[i] = doubleArray_getitem(outBuffer, i);
+                }
+                delete_doubleArray(dataBuffer);
+                delete_int64_tp(outLength);
+                delete_doubleArray(outBuffer);
+                return values[0];
+            }
+        } else {
+            throw new LGBMException("Booster was already closed");
+        }
+    }
+
+
     private int importanceType(FeatureImportanceType tpe) {
         int importanceType = C_API_FEATURE_IMPORTANCE_GAIN;
         switch (tpe) {
@@ -828,7 +939,6 @@ public class LGBMBooster implements AutoCloseable {
         } else {
             throw new LGBMException("Booster was already closed");
         }
-
     }
 
 
