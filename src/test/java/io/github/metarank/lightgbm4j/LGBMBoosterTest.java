@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Random;
 
+import static com.microsoft.ml.lightgbm.lightgbmlibConstants.C_API_DTYPE_FLOAT32;
+import static com.microsoft.ml.lightgbm.lightgbmlibConstants.C_API_DTYPE_FLOAT64;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class LGBMBoosterTest {
@@ -352,6 +354,34 @@ public class LGBMBoosterTest {
         booster.updateOneIter();
         booster.close();
         assertThrows(LGBMException.class, () -> booster.getPredict(0));
+    }
+
+    @Test void testPredictFastFloat() throws LGBMException, Exception {
+        LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification", null);
+        LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
+        booster.updateOneIter();
+        booster.updateOneIter();
+        booster.updateOneIter();
+        LGBMBooster.FastConfig config = booster.predictForMatSingleRowFastInit(PredictionType.C_API_PREDICT_NORMAL, C_API_DTYPE_FLOAT32,9, "");
+        double pred = booster.predictForMatSingleRowFast(config, new float[]{1, 2, 3, 4, 5, 6, 7, 8, 9}, PredictionType.C_API_PREDICT_NORMAL);
+        assertTrue(Double.isFinite(pred));
+        config.close();
+        dataset.close();
+        booster.close();
+    }
+
+    @Test void testPredictFastDouble() throws LGBMException, Exception {
+        LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification", null);
+        LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
+        booster.updateOneIter();
+        booster.updateOneIter();
+        booster.updateOneIter();
+        LGBMBooster.FastConfig config = booster.predictForMatSingleRowFastInit(PredictionType.C_API_PREDICT_NORMAL, C_API_DTYPE_FLOAT64,9, "");
+        double pred = booster.predictForMatSingleRowFast(config, new double[]{1, 2, 3, 4, 5, 6, 7, 8, 9}, PredictionType.C_API_PREDICT_NORMAL);
+        assertTrue(Double.isFinite(pred));
+        config.close();
+        dataset.close();
+        booster.close();
     }
 
     private float[] randomArray(int size) {
