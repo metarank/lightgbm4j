@@ -5,6 +5,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.IntStream;
 
 import static com.microsoft.ml.lightgbm.lightgbmlibConstants.C_API_DTYPE_FLOAT32;
 import static com.microsoft.ml.lightgbm.lightgbmlibConstants.C_API_DTYPE_FLOAT64;
@@ -105,6 +108,29 @@ public class LGBMBoosterTest {
             assertTrue(pred.length > 0, "predicted values should not be empty");
         }
         ds.close();
+        booster.close();
+    }
+
+    @Test
+    public void testPredictForMatConcurrent() throws LGBMException {
+        LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification", null);
+        LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
+        booster.updateOneIter();
+        booster.updateOneIter();
+        booster.updateOneIter();
+        booster.updateOneIter();
+        booster.updateOneIter();
+
+        IntStream.range(0, 1000000)
+                .parallel()
+                .forEach(i -> {
+                    try {
+                        double[] pred = booster.predictForMat(new float[]{1.0f,2.0f,3.0f,4.0f,5.0f,6.0f,7.0f,8.0f,9.0f}, 1, 9, true, PredictionType.C_API_PREDICT_CONTRIB);
+                    } catch (LGBMException e) {
+                        e.printStackTrace();
+                    }
+                });
+        dataset.close();
         booster.close();
     }
 
