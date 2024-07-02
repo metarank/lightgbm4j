@@ -18,6 +18,7 @@ export CC=gcc CXX=g++
 
 # checkout
 
-git clone --recursive https://github.com/microsoft/LightGBM
-cd LightGBM && git checkout v4.3.0 && mkdir build && cd build
-cmake -DUSE_SWIG=ON -DAPPLE_OUTPUT_DYLIB=ON ..
+git clone --recursive --depth 1 --branch v4.4.0 https://github.com/microsoft/LightGBM
+cd LightGBM 
+cmake -B build -S . -DUSE_SWIG=ON
+cmake --build build -j6

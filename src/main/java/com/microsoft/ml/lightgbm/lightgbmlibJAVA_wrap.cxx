@@ -914,7 +914,7 @@ double ** void_to_doublep_ptr(void * x) {
 
     /**
      * @brief Creates a new StringArray and returns its handle.
-     * 
+     *
      * @param num_strings number of strings to store.
      * @param string_size the maximum number of characters that can be stored in each string.
      * @return StringArrayHandle or nullptr in case of allocation failure.
@@ -929,7 +929,7 @@ double ** void_to_doublep_ptr(void * x) {
 
     /**
      * @brief Free the StringArray object.
-     * 
+     *
      * @param handle StringArray handle.
      */
     void StringArrayHandle_free(StringArrayHandle handle)
@@ -940,7 +940,7 @@ double ** void_to_doublep_ptr(void * x) {
     /**
      * @brief Return the raw pointer to the array of strings.
      * Wrapped in Java into String[] automatically.
-     * 
+     *
      * @param handle StringArray handle.
      * @return Raw pointer to the string array which `various.i` maps to String[].
      */
@@ -951,7 +951,7 @@ double ** void_to_doublep_ptr(void * x) {
 
     /**
      * For the end user to extract a specific string from the StringArray object.
-     * 
+     *
      * @param handle StringArray handle.
      * @param index index of the string to retrieve from the array.
      * @return raw pointer to string at index, or nullptr if out of bounds.
@@ -963,7 +963,7 @@ double ** void_to_doublep_ptr(void * x) {
 
     /**
      * @brief Replaces one string of the array at index with the new content.
-     * 
+     *
      * @param handle StringArray handle.
      * @param index Index of the string to replace
      * @param new_content The content to replace
@@ -976,7 +976,7 @@ double ** void_to_doublep_ptr(void * x) {
 
     /**
      * @brief Retrieve the number of strings in the StringArray.
-     * 
+     *
      * @param handle StringArray handle.
      * @return number of strings that the array stores.
      */
