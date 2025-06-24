@@ -6,7 +6,7 @@
 
     <groupId>io.github.metarank</groupId>
     <artifactId>lightgbm4j</artifactId>
-    <version>4.4.0-1</version>
+    <version>4.6.0-1</version>
 
     <name>LightGBM4j: Java LightGBM wrapper</name>
     <description>A high-level wrapper for LightGBM toolkit</description>

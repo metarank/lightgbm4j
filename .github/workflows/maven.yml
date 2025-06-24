@@ -25,11 +25,11 @@ jobs:
             platform: ubuntu-22.04
             architecture: x64
           - jvm: 11
-            platform: macos-14
+            platform: macos-13
             architecture: x64
-#          - jvm: 11
-#            platform: macos-14
-#            architecture: aarch64
+          - jvm: 11
+            platform: macos-14
+            architecture: aarch64
           - jvm: 11
             platform: windows-2022
             architecture: x64
@@ -70,9 +70,9 @@ jobs:
           ${{ runner.os }}-build-
           ${{ runner.os }}-
 
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
-      if: runner.os == 'macOS'
+#    - name: Setup tmate session
+#      uses: mxschmitt/action-tmate@v3
+#      if: runner.os == 'macOS'
 
     - name: Build with Maven
       run: mvn -B compile --file pom.xml
