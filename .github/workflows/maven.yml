@@ -70,8 +70,8 @@ jobs:
           ${{ runner.os }}-build-
           ${{ runner.os }}-
 
-    - name: check linking consistency on mac
-      run: otool -L src/main/resources/lightgbm4j/osx/x86_64/lib_lightgbm.dylib
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
       if: runner.os == 'macOS'
 
     - name: Build with Maven
