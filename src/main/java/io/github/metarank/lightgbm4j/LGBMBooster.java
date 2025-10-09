@@ -954,13 +954,18 @@ public class LGBMBooster implements AutoCloseable {
      * @return number of elements in the output result (size)
      */
     private long outBufferSize(int rows, int cols, PredictionType predictionType) {
-        long defaultSize = 2L * rows;
         if (PredictionType.C_API_PREDICT_CONTRIB.equals(predictionType))
-            return defaultSize * (cols + 1);
+            return (long) rows * (cols + 1);
         else if (PredictionType.C_API_PREDICT_LEAF_INDEX.equals(predictionType))
-            return defaultSize * iterations;
-        else // for C_API_PREDICT_NORMAL & C_API_PREDICT_RAW_SCORE
-            return defaultSize;
+            return (long) rows * iterations;
+        else {
+            try {
+                int numClass = getNumClasses();
+                return (long) rows * numClass;
+            } catch (LGBMException e) {
+                return (long) rows * 2;
+            }
+        }
     }
 
 }
