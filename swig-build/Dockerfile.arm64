@@ -8,6 +8,8 @@ RUN apt update && apt install -y kitware-archive-keyring
 RUN apt update && apt install -y cmake
 RUN git clone --recursive --depth 1 --branch v4.6.0 https://github.com/microsoft/LightGBM
 WORKDIR /LightGBM
+COPY lightgbm-swig-string-leak.patch /tmp/lightgbm-swig-string-leak.patch
+RUN git apply /tmp/lightgbm-swig-string-leak.patch
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-arm64/
 RUN cmake -B build -S . -DUSE_SWIG=ON
 RUN cmake --build build -j6

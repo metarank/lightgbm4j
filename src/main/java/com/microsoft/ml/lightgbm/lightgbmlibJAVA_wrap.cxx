@@ -296,6 +296,7 @@ template <typename T> T SwigValueInit() {
       result = LGBM_BoosterSaveModelToString(handle, start_iteration, num_iteration, feature_importance_type, realloc_len, out_len, dst);
     }
     if (result != 0) {
+      delete [] dst;
       return nullptr;
     }
     return dst;
@@ -317,6 +318,7 @@ template <typename T> T SwigValueInit() {
       result = LGBM_BoosterDumpModel(handle, start_iteration, num_iteration, feature_importance_type, realloc_len, out_len, dst);
     }
     if (result != 0) {
+      delete [] dst;
       return nullptr;
     }
     return dst;
@@ -3586,7 +3588,10 @@ SWIGEXPORT jstring JNICALL Java_com_microsoft_ml_lightgbm_lightgbmlibJNI_LGBM_1B
   arg5 = (int64_t)jarg5; 
   arg6 = *(int64_t **)&jarg6; 
   result = (char *)LGBM_BoosterSaveModelToStringSWIG(arg1,arg2,arg3,arg4,arg5,arg6);
-  if (result) jresult = jenv->NewStringUTF((const char *)result);
+  if (result) {
+    jresult = jenv->NewStringUTF((const char *)result);
+    delete [] result;
+  }
   return jresult;
 }
 
@@ -3610,7 +3615,10 @@ SWIGEXPORT jstring JNICALL Java_com_microsoft_ml_lightgbm_lightgbmlibJNI_LGBM_1B
   arg5 = (int64_t)jarg5; 
   arg6 = *(int64_t **)&jarg6; 
   result = (char *)LGBM_BoosterDumpModelSWIG(arg1,arg2,arg3,arg4,arg5,arg6);
-  if (result) jresult = jenv->NewStringUTF((const char *)result);
+  if (result) {
+    jresult = jenv->NewStringUTF((const char *)result);
+    delete [] result;
+  }
   return jresult;
 }
 

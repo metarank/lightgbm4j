@@ -1,13 +1,21 @@
 package io.github.metarank.lightgbm4j;
 
 import com.microsoft.ml.lightgbm.PredictionType;
+import com.microsoft.ml.lightgbm.SWIGTYPE_p_p_void;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Random;
 
+import static com.microsoft.ml.lightgbm.lightgbmlib.LGBM_BoosterSaveModel;
+import static com.microsoft.ml.lightgbm.lightgbmlib.voidpp_value;
 import static com.microsoft.ml.lightgbm.lightgbmlibConstants.C_API_DTYPE_FLOAT32;
 import static com.microsoft.ml.lightgbm.lightgbmlibConstants.C_API_DTYPE_FLOAT64;
+import static com.microsoft.ml.lightgbm.lightgbmlibConstants.C_API_FEATURE_IMPORTANCE_GAIN;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class LGBMBoosterTest {
@@ -66,6 +74,30 @@ public class LGBMBoosterTest {
         ds.close();
         booster.close();
         assertFalse(model.isEmpty(), "model string should not be empty");
+    }
+
+    @Test
+    public void testSaveModelToStringMatchesModelFile() throws Exception {
+        LGBMDataset ds = LGBMDataset.createFromMat(new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 2, 2, true, "", null);
+        LGBMBooster booster = LGBMBooster.create(ds, "");
+        Path modelFile = Files.createTempFile("lightgbm4j-model", ".txt");
+        try {
+            String model = booster.saveModelToString(0, 0, LGBMBooster.FeatureImportanceType.GAIN);
+            int result = LGBM_BoosterSaveModel(
+                    voidpp_value(boosterHandle(booster)),
+                    0,
+                    0,
+                    C_API_FEATURE_IMPORTANCE_GAIN,
+                    modelFile.toString()
+            );
+            assertEquals(0, result, "model file save should succeed");
+            assertArrayEquals(Files.readAllBytes(modelFile), model.getBytes(StandardCharsets.UTF_8),
+                    "saveModelToString should return the same bytes as SaveModel file output");
+        } finally {
+            Files.deleteIfExists(modelFile);
+            ds.close();
+            booster.close();
+        }
     }
 
     @Test
@@ -382,6 +414,12 @@ public class LGBMBoosterTest {
         config.close();
         dataset.close();
         booster.close();
+    }
+
+    private SWIGTYPE_p_p_void boosterHandle(LGBMBooster booster) throws Exception {
+        Field handle = LGBMBooster.class.getDeclaredField("handle");
+        handle.setAccessible(true);
+        return (SWIGTYPE_p_p_void) handle.get(booster);
     }
 
     private float[] randomArray(int size) {

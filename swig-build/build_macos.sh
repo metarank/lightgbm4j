@@ -20,5 +20,6 @@ export CC=gcc CXX=g++
 
 git clone --recursive --depth 1 --branch v4.4.0 https://github.com/microsoft/LightGBM
 cd LightGBM 
+git apply ../lightgbm-swig-string-leak.patch
 cmake -B build -S . -DUSE_SWIG=ON
 cmake --build build -j6

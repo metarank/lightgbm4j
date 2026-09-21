@@ -1,0 +1,35 @@
+diff --git a/swig/lightgbmlib.i b/swig/lightgbmlib.i
+index 67937c4..81eec00 100644
+--- a/swig/lightgbmlib.i
++++ b/swig/lightgbmlib.i
+@@ -33,6 +33,14 @@
+   $1 = jenv;
+ %}
+ 
++%typemap(out) char * LGBM_BoosterSaveModelToStringSWIG,
++              char * LGBM_BoosterDumpModelSWIG %{
++  if ($1) {
++    $result = jenv->NewStringUTF((const char *)$1);
++    delete [] $1;
++  }
++%}
++
+ %inline %{
+   char * LGBM_BoosterSaveModelToStringSWIG(BoosterHandle handle,
+                                            int start_iteration,
+@@ -50,6 +58,7 @@
+       result = LGBM_BoosterSaveModelToString(handle, start_iteration, num_iteration, feature_importance_type, realloc_len, out_len, dst);
+     }
+     if (result != 0) {
++      delete [] dst;
+       return nullptr;
+     }
+     return dst;
+@@ -71,6 +80,7 @@
+       result = LGBM_BoosterDumpModel(handle, start_iteration, num_iteration, feature_importance_type, realloc_len, out_len, dst);
+     }
+     if (result != 0) {
++      delete [] dst;
+       return nullptr;
+     }
+     return dst;
