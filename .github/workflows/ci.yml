@@ -168,7 +168,11 @@ jobs:
 
       - name: Jar bundles all five platforms
         run: |
-          jar=$(ls target/lightgbm4j-*.jar | grep -v -E 'sources|javadoc')
+          jar=""
+          for f in target/lightgbm4j-*.jar; do
+            case "$f" in *-sources.jar|*-javadoc.jar) ;; *) jar="$f" ;; esac
+          done
+          [[ -n "$jar" ]] || { echo "::error::main jar not found in target/"; exit 1; }
           unzip -l "$jar" | grep 'lightgbm4j/' | grep -E 'lib_lightgbm' | tee /tmp/natives.txt
           for dir in linux/x86_64 linux/aarch64 osx/x86_64 osx/aarch64 windows/x86_64; do
             [[ "$(grep -c "lightgbm4j/$dir/" /tmp/natives.txt)" == 4 ]] || { echo "::error::$dir does not have 2 libs + 2 md5 in $jar"; exit 1; }
