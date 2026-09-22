@@ -41,7 +41,7 @@ To install, use the following maven coordinates:
 <dependency>
   <groupId>io.github.metarank</groupId>
   <artifactId>lightgbm4j</artifactId>
-  <version>4.6.0-2</version>
+  <version>4.6.0-3</version>
 </dependency>
 ```
 
@@ -90,6 +90,21 @@ native/linux.sh      # rebuilds natives and regenerates src/main/java/com/micros
 mvn test
 # bump <version> in pom.xml, then commit native/lightgbm, src/main/java/com/microsoft/ml/lightgbm and pom.xml
 ```
+
+### Releasing
+
+Releases are published by CI (`.github/workflows/release.yml`) when a version tag is pushed:
+
+```bash
+# bump <version> in pom.xml and in the README snippet above, then:
+git commit -am "release X.Y.Z-N"
+git tag X.Y.Z-N
+git push origin main X.Y.Z-N
+```
+
+The workflow builds the natives on all platforms, checks the pom version matches the tag, runs the tests, signs and
+publishes to Maven Central, and creates the GitHub release with the jars attached. It needs the `SONATYPE_USERNAME`,
+`SONATYPE_PASSWORD`, `PGP_SECRET` and `PGP_PASSPHRASE` secrets (shared with other metarank repos).
 
 ### GPU support
 
