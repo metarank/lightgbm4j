@@ -1,0 +1,83 @@
+name: native
+
+# Reusable: builds the native libs on every platform and uploads one artifact per leg.
+# Called by ci.yml (PRs, main) and release.yml (tags). Each leg runs the same script a developer
+# runs locally (native/linux.sh, native/macos.sh, native/windows.ps1) and uploads native/dist/resources.
+on:
+  workflow_call:
+
+jobs:
+  native:
+    name: native ${{ matrix.leg }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { leg: linux-x86_64,   runner: ubuntu-22.04,     script: native/linux.sh --no-sync-java }
+          - { leg: linux-aarch64,  runner: ubuntu-22.04-arm, script: native/linux.sh --no-sync-java }
+          - { leg: osx-x86_64,     runner: macos-15-intel,   script: native/macos.sh }
+          - { leg: osx-aarch64,    runner: macos-14,         script: native/macos.sh }
+          - { leg: windows-x86_64, runner: windows-2022,     script: pwsh native/windows.ps1 }
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: Submodule revision
+        id: sub
+        shell: bash
+        run: echo "sha=$(git rev-parse HEAD:native/lightgbm)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache native/dist
+        id: cache
+        uses: actions/cache@v6
+        with:
+          path: native/dist
+          key: native-v1-${{ matrix.leg }}-${{ steps.sub.outputs.sha }}-${{ hashFiles('native/Dockerfile', 'native/*.sh', 'native/*.ps1') }}
+
+      - name: Install toolchain (macOS)
+        if: steps.cache.outputs.cache-hit != 'true' && runner.os == 'macOS'
+        run: brew install cmake swig libomp
+
+      - name: Install toolchain (Windows)
+        if: steps.cache.outputs.cache-hit != 'true' && runner.os == 'Windows'
+        run: choco install swig --no-progress -y
+
+      - name: Set up JDK
+        if: steps.cache.outputs.cache-hit != 'true' && runner.os != 'Linux'
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '11'
+
+      - name: Set up buildx
+        if: steps.cache.outputs.cache-hit != 'true' && runner.os == 'Linux'
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build natives
+        if: steps.cache.outputs.cache-hit != 'true'
+        shell: bash
+        env:
+          DOCKER_BUILD_EXTRA_ARGS: --cache-from type=gha,scope=${{ matrix.leg }} --cache-to type=gha,scope=${{ matrix.leg }},mode=max
+        run: ${{ matrix.script }}
+
+      - name: List output
+        shell: bash
+        run: find native/dist -type f | sort
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: natives-${{ matrix.leg }}
+          path: native/dist/resources
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload generated SWIG java (canonical leg)
+        if: matrix.leg == 'linux-x86_64'
+        uses: actions/upload-artifact@v7
+        with:
+          name: swig-java
+          path: native/dist/java
+          if-no-files-found: error
+          retention-days: 7
