@@ -1,0 +1,4 @@
+[submodule "native/lightgbm"]
+	path = native/lightgbm
+	url = https://github.com/microsoft/LightGBM.git
+	ignore = untracked

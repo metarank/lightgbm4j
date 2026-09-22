@@ -300,7 +300,7 @@ public class LGBMDataset implements AutoCloseable {
                     float[] out = new float[len];
                     for (int i=0; i<len; i++) {
                         // Hello, this is Johny Knoxville, and today we're reading a raw void pointer as an array of floats
-                        out[i] = lightgbmlibJNI.floatArray_getitem(SWIGTYPE_p_void.getCPtr(buf), i);
+                        out[i] = lightgbmlibJNI.floatArray_getitem(SwigPointers.of(buf), i);
                     }
                     delete_intp(lenPtr);
                     delete_voidpp(bufferPtr);
@@ -342,7 +342,7 @@ public class LGBMDataset implements AutoCloseable {
                     SWIGTYPE_p_void buf = voidpp_value(bufferPtr);
                     int[] out = new int[len];
                     for (int i=0; i<len; i++) {
-                        out[i] = lightgbmlibJNI.intArray_getitem(SWIGTYPE_p_void.getCPtr(buf), i);
+                        out[i] = lightgbmlibJNI.intArray_getitem(SwigPointers.of(buf), i);
                     }
                     delete_intp(lenPtr);
                     delete_voidpp(bufferPtr);

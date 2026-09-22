@@ -97,12 +97,16 @@ public class lightgbmlib implements lightgbmlibConstants {
     return lightgbmlibJNI.LGBM_DatasetCreateFromMat(SWIGTYPE_p_void.getCPtr(data), data_type, nrow, ncol, is_row_major, parameters, SWIGTYPE_p_void.getCPtr(reference), SWIGTYPE_p_p_void.getCPtr(out));
   }
 
-  public static int LGBM_DatasetCreateFromMats(int nmat, SWIGTYPE_p_p_void data, int data_type, SWIGTYPE_p_int nrow, int ncol, int is_row_major, String parameters, SWIGTYPE_p_void reference, SWIGTYPE_p_p_void out) {
-    return lightgbmlibJNI.LGBM_DatasetCreateFromMats(nmat, SWIGTYPE_p_p_void.getCPtr(data), data_type, SWIGTYPE_p_int.getCPtr(nrow), ncol, is_row_major, parameters, SWIGTYPE_p_void.getCPtr(reference), SWIGTYPE_p_p_void.getCPtr(out));
+  public static int LGBM_DatasetCreateFromMats(int nmat, SWIGTYPE_p_p_void data, int data_type, SWIGTYPE_p_int nrow, int ncol, SWIGTYPE_p_int is_row_major, String parameters, SWIGTYPE_p_void reference, SWIGTYPE_p_p_void out) {
+    return lightgbmlibJNI.LGBM_DatasetCreateFromMats(nmat, SWIGTYPE_p_p_void.getCPtr(data), data_type, SWIGTYPE_p_int.getCPtr(nrow), ncol, SWIGTYPE_p_int.getCPtr(is_row_major), parameters, SWIGTYPE_p_void.getCPtr(reference), SWIGTYPE_p_p_void.getCPtr(out));
   }
 
   public static int LGBM_DatasetCreateFromArrow(long n_chunks, SWIGTYPE_p_ArrowArray chunks, SWIGTYPE_p_ArrowSchema schema, String parameters, SWIGTYPE_p_void reference, SWIGTYPE_p_p_void out) {
     return lightgbmlibJNI.LGBM_DatasetCreateFromArrow(n_chunks, SWIGTYPE_p_ArrowArray.getCPtr(chunks), SWIGTYPE_p_ArrowSchema.getCPtr(schema), parameters, SWIGTYPE_p_void.getCPtr(reference), SWIGTYPE_p_p_void.getCPtr(out));
+  }
+
+  public static int LGBM_DatasetCreateFromArrowStream(SWIGTYPE_p_ArrowArrayStream stream, String parameters, SWIGTYPE_p_void reference, SWIGTYPE_p_p_void out) {
+    return lightgbmlibJNI.LGBM_DatasetCreateFromArrowStream(SWIGTYPE_p_ArrowArrayStream.getCPtr(stream), parameters, SWIGTYPE_p_void.getCPtr(reference), SWIGTYPE_p_p_void.getCPtr(out));
   }
 
   public static int LGBM_DatasetGetSubset(SWIGTYPE_p_void handle, SWIGTYPE_p_int used_row_indices, int num_used_row_indices, String parameters, SWIGTYPE_p_p_void out) {
@@ -139,6 +143,10 @@ public class lightgbmlib implements lightgbmlibConstants {
 
   public static int LGBM_DatasetSetFieldFromArrow(SWIGTYPE_p_void handle, String field_name, long n_chunks, SWIGTYPE_p_ArrowArray chunks, SWIGTYPE_p_ArrowSchema schema) {
     return lightgbmlibJNI.LGBM_DatasetSetFieldFromArrow(SWIGTYPE_p_void.getCPtr(handle), field_name, n_chunks, SWIGTYPE_p_ArrowArray.getCPtr(chunks), SWIGTYPE_p_ArrowSchema.getCPtr(schema));
+  }
+
+  public static int LGBM_DatasetSetFieldFromArrowStream(SWIGTYPE_p_void handle, String field_name, SWIGTYPE_p_ArrowArrayStream stream) {
+    return lightgbmlibJNI.LGBM_DatasetSetFieldFromArrowStream(SWIGTYPE_p_void.getCPtr(handle), field_name, SWIGTYPE_p_ArrowArrayStream.getCPtr(stream));
   }
 
   public static int LGBM_DatasetGetField(SWIGTYPE_p_void handle, String field_name, SWIGTYPE_p_int out_len, SWIGTYPE_p_p_void out_ptr, SWIGTYPE_p_int out_type) {
@@ -213,16 +221,16 @@ public class lightgbmlib implements lightgbmlibConstants {
     return lightgbmlibJNI.LGBM_BoosterGetNumClasses(SWIGTYPE_p_void.getCPtr(handle), SWIGTYPE_p_int.getCPtr(out_len));
   }
 
-  public static int LGBM_BoosterUpdateOneIter(SWIGTYPE_p_void handle, SWIGTYPE_p_int is_finished) {
-    return lightgbmlibJNI.LGBM_BoosterUpdateOneIter(SWIGTYPE_p_void.getCPtr(handle), SWIGTYPE_p_int.getCPtr(is_finished));
+  public static int LGBM_BoosterUpdateOneIter(SWIGTYPE_p_void handle, SWIGTYPE_p_int produced_empty_tree) {
+    return lightgbmlibJNI.LGBM_BoosterUpdateOneIter(SWIGTYPE_p_void.getCPtr(handle), SWIGTYPE_p_int.getCPtr(produced_empty_tree));
   }
 
   public static int LGBM_BoosterRefit(SWIGTYPE_p_void handle, SWIGTYPE_p_int leaf_preds, int nrow, int ncol) {
     return lightgbmlibJNI.LGBM_BoosterRefit(SWIGTYPE_p_void.getCPtr(handle), SWIGTYPE_p_int.getCPtr(leaf_preds), nrow, ncol);
   }
 
-  public static int LGBM_BoosterUpdateOneIterCustom(SWIGTYPE_p_void handle, SWIGTYPE_p_float grad, SWIGTYPE_p_float hess, SWIGTYPE_p_int is_finished) {
-    return lightgbmlibJNI.LGBM_BoosterUpdateOneIterCustom(SWIGTYPE_p_void.getCPtr(handle), SWIGTYPE_p_float.getCPtr(grad), SWIGTYPE_p_float.getCPtr(hess), SWIGTYPE_p_int.getCPtr(is_finished));
+  public static int LGBM_BoosterUpdateOneIterCustom(SWIGTYPE_p_void handle, SWIGTYPE_p_float grad, SWIGTYPE_p_float hess, SWIGTYPE_p_int produced_empty_tree) {
+    return lightgbmlibJNI.LGBM_BoosterUpdateOneIterCustom(SWIGTYPE_p_void.getCPtr(handle), SWIGTYPE_p_float.getCPtr(grad), SWIGTYPE_p_float.getCPtr(hess), SWIGTYPE_p_int.getCPtr(produced_empty_tree));
   }
 
   public static int LGBM_BoosterRollbackOneIter(SWIGTYPE_p_void handle) {
@@ -327,6 +335,10 @@ public class lightgbmlib implements lightgbmlibConstants {
 
   public static int LGBM_BoosterPredictForArrow(SWIGTYPE_p_void handle, long n_chunks, SWIGTYPE_p_ArrowArray chunks, SWIGTYPE_p_ArrowSchema schema, int predict_type, int start_iteration, int num_iteration, String parameter, SWIGTYPE_p_long_long out_len, SWIGTYPE_p_double out_result) {
     return lightgbmlibJNI.LGBM_BoosterPredictForArrow(SWIGTYPE_p_void.getCPtr(handle), n_chunks, SWIGTYPE_p_ArrowArray.getCPtr(chunks), SWIGTYPE_p_ArrowSchema.getCPtr(schema), predict_type, start_iteration, num_iteration, parameter, SWIGTYPE_p_long_long.getCPtr(out_len), SWIGTYPE_p_double.getCPtr(out_result));
+  }
+
+  public static int LGBM_BoosterPredictForArrowStream(SWIGTYPE_p_void handle, SWIGTYPE_p_ArrowArrayStream stream, int predict_type, int start_iteration, int num_iteration, String parameter, SWIGTYPE_p_long_long out_len, SWIGTYPE_p_double out_result) {
+    return lightgbmlibJNI.LGBM_BoosterPredictForArrowStream(SWIGTYPE_p_void.getCPtr(handle), SWIGTYPE_p_ArrowArrayStream.getCPtr(stream), predict_type, start_iteration, num_iteration, parameter, SWIGTYPE_p_long_long.getCPtr(out_len), SWIGTYPE_p_double.getCPtr(out_result));
   }
 
   public static int LGBM_BoosterSaveModel(SWIGTYPE_p_void handle, int start_iteration, int num_iteration, int feature_importance_type, String filename) {

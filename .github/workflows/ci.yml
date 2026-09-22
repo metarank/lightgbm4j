@@ -1,0 +1,176 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  actionlint:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: reviewdog/action-actionlint@v1
+        with:
+          fail_level: error
+
+  # One leg per platform. Each leg runs the same script a developer runs locally
+  # (native/linux.sh, native/macos.sh, native/windows.ps1) and uploads native/dist/resources.
+  native:
+    name: native ${{ matrix.leg }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { leg: linux-x86_64,   runner: ubuntu-22.04,     script: native/linux.sh --no-sync-java }
+          - { leg: linux-aarch64,  runner: ubuntu-22.04-arm, script: native/linux.sh --no-sync-java }
+          - { leg: osx-x86_64,     runner: macos-15-intel,   script: native/macos.sh }
+          - { leg: osx-aarch64,    runner: macos-14,         script: native/macos.sh }
+          - { leg: windows-x86_64, runner: windows-2022,     script: pwsh native/windows.ps1 }
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: recursive
+
+      - name: Submodule revision
+        id: sub
+        shell: bash
+        run: echo "sha=$(git rev-parse HEAD:native/lightgbm)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache native/dist
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: native/dist
+          key: native-v1-${{ matrix.leg }}-${{ steps.sub.outputs.sha }}-${{ hashFiles('native/Dockerfile', 'native/*.sh', 'native/*.ps1') }}
+
+      - name: Install toolchain (macOS)
+        if: steps.cache.outputs.cache-hit != 'true' && runner.os == 'macOS'
+        run: brew install cmake swig libomp
+
+      - name: Install toolchain (Windows)
+        if: steps.cache.outputs.cache-hit != 'true' && runner.os == 'Windows'
+        run: choco install swig --no-progress -y
+
+      - name: Set up JDK
+        if: steps.cache.outputs.cache-hit != 'true' && runner.os != 'Linux'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+
+      - name: Set up buildx
+        if: steps.cache.outputs.cache-hit != 'true' && runner.os == 'Linux'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build natives
+        if: steps.cache.outputs.cache-hit != 'true'
+        shell: bash
+        env:
+          DOCKER_BUILD_EXTRA_ARGS: --cache-from type=gha,scope=${{ matrix.leg }} --cache-to type=gha,scope=${{ matrix.leg }},mode=max
+        run: ${{ matrix.script }}
+
+      - name: List output
+        shell: bash
+        run: find native/dist -type f | sort
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: natives-${{ matrix.leg }}
+          path: native/dist/resources
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload generated SWIG java (canonical leg)
+        if: matrix.leg == 'linux-x86_64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: swig-java
+          path: native/dist/java
+          if-no-files-found: error
+          retention-days: 7
+
+  test:
+    name: test ${{ matrix.leg }} jdk${{ matrix.jvm }}
+    needs: native
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { leg: linux-x86_64,   runner: ubuntu-22.04,     jvm: 11 }
+          - { leg: linux-x86_64,   runner: ubuntu-22.04,     jvm: 17 }
+          - { leg: linux-x86_64,   runner: ubuntu-22.04,     jvm: 21 }
+          - { leg: linux-aarch64,  runner: ubuntu-22.04-arm, jvm: 11 }
+          - { leg: osx-x86_64,     runner: macos-15-intel,   jvm: 11 }
+          - { leg: osx-aarch64,    runner: macos-14,         jvm: 11 }
+          - { leg: windows-x86_64, runner: windows-2022,     jvm: 11 }
+          - { leg: windows-x86_64, runner: windows-2022,     jvm: 17 }
+          - { leg: windows-x86_64, runner: windows-2022,     jvm: 21 }
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          lfs: true # test data under src/test/resources
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: natives-${{ matrix.leg }}
+          path: native/dist/resources
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.jvm }}
+          cache: maven
+
+      - name: Install libomp
+        if: runner.os == 'macOS'
+        run: brew install libomp
+
+      - run: mvn -B test
+
+  # Fan-in: merge every leg's natives into one jar and check the committed SWIG java is current.
+  package:
+    needs: native
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: natives-*
+          path: native/dist/resources
+          merge-multiple: true
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: swig-java
+          path: native/dist/java
+
+      - name: Verify all natives present
+        run: bash native/verify-dist.sh
+
+      - name: Committed SWIG java is up to date
+        run: |
+          find src/main/java/com/microsoft/ml/lightgbm -maxdepth 1 -name '*.java' ! -name PredictionType.java ! -name SwigPointers.java -delete
+          cp native/dist/java/com/microsoft/ml/lightgbm/*.java src/main/java/com/microsoft/ml/lightgbm/
+          git diff --exit-code --stat -- src/main/java/com/microsoft/ml/lightgbm \
+            || { echo "::error::src/main/java/com/microsoft/ml/lightgbm is stale; run native/linux.sh and commit the result"; exit 1; }
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+          cache: maven
+
+      - run: mvn -B -DskipTests package
+
+      - name: Jar contents
+        run: unzip -l target/lightgbm4j-*.jar | grep 'lightgbm4j/'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jar
+          path: target/lightgbm4j-*.jar
+          retention-days: 7
