@@ -43,8 +43,9 @@ public class lightgbmlibJNI {
   public final static native int LGBM_DatasetCreateFromCSRFunc(long jarg1, int jarg2, long jarg3, String jarg4, long jarg5, long jarg6);
   public final static native int LGBM_DatasetCreateFromCSC(long jarg1, int jarg2, long jarg3, long jarg4, int jarg5, long jarg6, long jarg7, long jarg8, String jarg9, long jarg10, long jarg11);
   public final static native int LGBM_DatasetCreateFromMat(long jarg1, int jarg2, int jarg3, int jarg4, int jarg5, String jarg6, long jarg7, long jarg8);
-  public final static native int LGBM_DatasetCreateFromMats(int jarg1, long jarg2, int jarg3, long jarg4, int jarg5, int jarg6, String jarg7, long jarg8, long jarg9);
+  public final static native int LGBM_DatasetCreateFromMats(int jarg1, long jarg2, int jarg3, long jarg4, int jarg5, long jarg6, String jarg7, long jarg8, long jarg9);
   public final static native int LGBM_DatasetCreateFromArrow(long jarg1, long jarg2, long jarg3, String jarg4, long jarg5, long jarg6);
+  public final static native int LGBM_DatasetCreateFromArrowStream(long jarg1, String jarg2, long jarg3, long jarg4);
   public final static native int LGBM_DatasetGetSubset(long jarg1, long jarg2, int jarg3, String jarg4, long jarg5);
   public final static native int LGBM_DatasetSetFeatureNames(long jarg1, String[] jarg2, int jarg3);
   public final static native int LGBM_DatasetGetFeatureNames(long jarg1, int jarg2, long jarg3, long jarg4, long jarg5, String[] jarg6);
@@ -54,6 +55,7 @@ public class lightgbmlibJNI {
   public final static native int LGBM_DatasetDumpText(long jarg1, String jarg2);
   public final static native int LGBM_DatasetSetField(long jarg1, String jarg2, long jarg3, int jarg4, int jarg5);
   public final static native int LGBM_DatasetSetFieldFromArrow(long jarg1, String jarg2, long jarg3, long jarg4, long jarg5);
+  public final static native int LGBM_DatasetSetFieldFromArrowStream(long jarg1, String jarg2, long jarg3);
   public final static native int LGBM_DatasetGetField(long jarg1, String jarg2, long jarg3, long jarg4, long jarg5);
   public final static native int LGBM_DatasetUpdateParamChecking(String jarg1, String jarg2);
   public final static native int LGBM_DatasetGetNumData(long jarg1, long jarg2);
@@ -101,6 +103,7 @@ public class lightgbmlibJNI {
   public final static native int LGBM_BoosterPredictForMatSingleRowFast(long jarg1, long jarg2, long jarg3, long jarg4);
   public final static native int LGBM_BoosterPredictForMats(long jarg1, long jarg2, int jarg3, int jarg4, int jarg5, int jarg6, int jarg7, int jarg8, String jarg9, long jarg10, long jarg11);
   public final static native int LGBM_BoosterPredictForArrow(long jarg1, long jarg2, long jarg3, long jarg4, int jarg5, int jarg6, int jarg7, String jarg8, long jarg9, long jarg10);
+  public final static native int LGBM_BoosterPredictForArrowStream(long jarg1, long jarg2, int jarg3, int jarg4, int jarg5, String jarg6, long jarg7, long jarg8);
   public final static native int LGBM_BoosterSaveModel(long jarg1, int jarg2, int jarg3, int jarg4, String jarg5);
   public final static native int LGBM_BoosterDumpModel(long jarg1, int jarg2, int jarg3, int jarg4, long jarg5, long jarg6, String jarg7);
   public final static native int LGBM_BoosterGetLeafValue(long jarg1, int jarg2, int jarg3, long jarg4);

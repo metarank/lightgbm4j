@@ -62,10 +62,39 @@ For Debian Linux:
 apt install libgomp1
 ```
 
+### Building from source
+
+The native LightGBM libraries are not committed to this repo: they are built from the `native/lightgbm` git submodule
+(pinned to the upstream LightGBM release we ship) with one script per platform. The same scripts run in CI.
+
+```bash
+git clone --recursive https://github.com/metarank/lightgbm4j   # or: git submodule update --init --recursive
+```
+
+* Linux (docker only, builds inside `native/Dockerfile` against glibc 2.31): `native/linux.sh`
+* macOS (`brew install cmake swig libomp` and a JDK): `native/macos.sh`
+* Windows (Visual Studio 2022 C++ workload, cmake, `choco install swig`, a JDK), from PowerShell: `native/windows.ps1`
+
+Each script writes `native/dist/resources/lightgbm4j/<os>/<arch>/lib_lightgbm.*` and `lib_lightgbm_swig.*` with `.md5` sidecars,
+which Maven bundles as resources. After that, `mvn test` and `mvn package` work as usual. A jar built locally only contains
+the natives for your own platform; the CI `package` job merges all platforms into one jar.
+
+The SWIG-generated Java sources in `src/main/java/com/microsoft/ml/lightgbm/` are committed, so Java-only changes need no
+native toolchain to compile. `native/linux.sh` regenerates them (it is the canonical leg with a pinned SWIG version), and CI
+fails if the committed sources are stale.
+
+To bump the upstream LightGBM version:
+```bash
+cd native/lightgbm && git fetch --tags && git checkout vX.Y.Z && git submodule update --init --recursive && cd ../..
+native/linux.sh      # rebuilds natives and regenerates src/main/java/com/microsoft/ml/lightgbm
+mvn test
+# bump <version> in pom.xml, then commit native/lightgbm, src/main/java/com/microsoft/ml/lightgbm and pom.xml
+```
+
 ### GPU support
 
 It is possible to force GPU support for a training:
-* rebuild the [LightGBM with GPU support]: use `-DUSE_CUDA=1 -DUSE_SWIG=ON` CMake options. You should also match the native/JNI versions precisely.
+* rebuild the LightGBM with GPU support: in `native/lightgbm`, configure with `-DUSE_CUDA=1 -DUSE_SWIG=ON` CMake options. You should also match the native/JNI versions precisely.
 * LightGBM4j loads native libraries by default from bundled resources. This can be overridden by setting the `LIGHTGBM_NATIVE_LIB_PATH` environment variable. It should point to a directory with `lib_lightgbm.so` and `lib_lightgbm_swig.so` files (or with `dll`/`dylib` extensions on Windows/MacOS).
 
 If the native override was able to successfully load a custom library you've built, then you'll see the following line in logs:
@@ -299,7 +328,7 @@ booster.close();
 
 ## Supported platforms
 
-This code is tested to work well with Linux (Ubuntu 20.04), Windows (Server 2019) and MacOS 10.15/11. Mac M1 is also supported.
+Native libraries are built and tested in CI for Linux x86_64 and aarch64 (glibc 2.31+), Windows x86_64, and macOS x86_64 and arm64.
 Supported Java versions are 11, 17 and 21.
 
 ## LightGBM API Coverage

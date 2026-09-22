@@ -5,3 +5,5 @@ project/project
 project/target
 .testcontainers*
 *.iml
+native/dist/
+native/lightgbm/build/
