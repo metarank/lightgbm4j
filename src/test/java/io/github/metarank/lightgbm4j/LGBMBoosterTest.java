@@ -325,6 +325,22 @@ public class LGBMBoosterTest {
         booster.close();
     }
 
+    @Test void testRollbackOneIter() throws LGBMException {
+        LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification", null);
+        LGBMBooster booster = LGBMBooster.create(dataset, "objective=binary label=name:Classification");
+        booster.updateOneIter();
+        booster.updateOneIter();
+        booster.updateOneIter();
+        assertEquals(3, booster.getCurrentIteration());
+        booster.rollbackOneIter();
+        assertEquals(2, booster.getCurrentIteration());
+        double[] preds = booster.predictForMat(new double[]{1, 2, 3, 4, 5, 6, 7, 8, 9}, 1, 9, true, PredictionType.C_API_PREDICT_NORMAL);
+        assertEquals(1, preds.length);
+        assertTrue(Double.isFinite(preds[0]));
+        dataset.close();
+        booster.close();
+    }
+
     @Test void testUpdateOneIterCustom() throws LGBMException {
         LGBMDataset dataset = LGBMDataset.createFromFile("src/test/resources/cancer.csv", "header=true label=name:Classification", null);
         LGBMBooster booster = LGBMBooster.create(dataset, "objective=none metric=rmse label=name:Classification");
