@@ -428,6 +428,50 @@ public class LGBMBooster implements AutoCloseable {
         }
     }
 
+    /**
+     * Rollback one iteration, dropping the trees added by the last updateOneIter call.
+     * Useful to return the model as of the best iteration after early stopping.
+     *
+     * @throws LGBMException
+     */
+    public void rollbackOneIter() throws LGBMException {
+        if (!isClosed) {
+            int result = LGBM_BoosterRollbackOneIter(voidpp_value(handle));
+            if (result < 0) {
+                throw new LGBMException(LGBM_GetLastError());
+            }
+            if (iterations > 0) {
+                iterations--;
+            }
+        } else {
+            throw new LGBMException("Booster was already closed");
+        }
+    }
+
+    /**
+     * Get the index of the current boosting iteration.
+     *
+     * @return number of completed iterations
+     * @throws LGBMException
+     */
+    public int getCurrentIteration() throws LGBMException {
+        if (!isClosed) {
+            SWIGTYPE_p_int outIteration = new_intp();
+            int result = LGBM_BoosterGetCurrentIteration(voidpp_value(handle), outIteration);
+            if (result < 0) {
+                delete_intp(outIteration);
+                throw new LGBMException(LGBM_GetLastError());
+            } else {
+                int iteration = intp_value(outIteration);
+                delete_intp(outIteration);
+                iterations = iteration;
+                return iteration;
+            }
+        } else {
+            throw new LGBMException("Booster was already closed");
+        }
+    }
+
     public enum FeatureImportanceType {
         SPLIT,
         GAIN
